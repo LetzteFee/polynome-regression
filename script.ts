@@ -1,7 +1,7 @@
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 let VALUES: number[][] = [];
-const efficiency: number = -1;
+const efficiency: number = 10000;
 const quadV: boolean = true;
 
 
@@ -11,7 +11,7 @@ function setup(): void {
     let len: number = Math.round(random(10));
     for (let i: number = 0; i < len; i++) {
         // @ts-ignore
-        VALUES[i] = [Math.round(WIDTH * (i / len)), Math.round(random(HEIGHT))];
+        VALUES[i] = [Math.round(WIDTH * (i / (len - 1))), Math.round(random(HEIGHT))];
     }
 
 
@@ -71,7 +71,7 @@ function drawPoint(x: number, y: number): void {
     // @ts-ignore
     y *= height / HEIGHT;
     // @ts-ignore
-    noFill();
+    fill('red');
     // @ts-ignore
     ellipse(x, height - y, 4);
 }
@@ -81,26 +81,27 @@ function drawPlot(): void {
     }
 }
 function calc(): void {
-    let a: number;
-    let b: number;
-    let orig: number;
+    let plusV: number;
+    let minusV: number;
+    let origV: number;
     let faktor: number;
     // @ts-ignore
     let len: number = efficiency > 0 ? efficiency : frameCount;
     for (let j: number = 0; j < len; j++) {
         for (let i: number = 0; i < koeffizienten.length; i++) {
             faktor = koeffizienten[i][1];
-            orig = calcV();
+
+            origV = calcV();
             koeffizienten[i][0] += faktor;
-            a = calcV();
+            plusV = calcV();
             koeffizienten[i][0] -= 2 * faktor;
-            b = calcV();
+            minusV = calcV();
             koeffizienten[i][0] += faktor;
 
-            if (a < orig) {
+            if (plusV < origV) {
                 koeffizienten[i][0] += faktor;
                 koeffizienten[i][1] *= 2;
-            } else if (b < orig) {
+            } else if (minusV < origV) {
                 koeffizienten[i][0] -= faktor;
                 koeffizienten[i][1] *= 2;
             } else {
