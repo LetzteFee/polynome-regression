@@ -1,26 +1,22 @@
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 let VALUES: number[][] = [];
-const efficiency: number = 10000;
-const quadV: boolean = true;
 
 
 let koeffizienten: number[][] = []; //[[ZAHL, FAKTOR]]
 function setup(): void {
     // @ts-ignore
-    let len: number = Math.round(random(10));
-    for (let i: number = 0; i < len; i++) {
+    let n: number = 6;//Math.round(random(10));
+    for (let i: number = 0; i < n; i++) {
         // @ts-ignore
-        VALUES[i] = [Math.round(WIDTH * (i / (len - 1))), Math.round(random(HEIGHT))];
+        VALUES[i] = [Math.round(WIDTH * (i / (n - 1))), Math.round(random(HEIGHT))];
     }
 
 
     // @ts-ignore
     createCanvas(windowWidth, windowHeight);
-    // @ts-ignore
-    frameRate(100);
-    for (let i: number = 0; i <= VALUES.length; i++) {
-        koeffizienten[i] = [10, 10];
+    for (let i: number = 0; i < VALUES.length; i++) {
+        koeffizienten[i] = [0, 1];
     }
 }
 
@@ -52,7 +48,7 @@ function drawGraph(): void {
     let y1: number;
     let y2: number;
     // @ts-ignore
-    for (let i = 0; i < width - 1; i++) {
+    for (let i = 0; i < width; i++) {
         // @ts-ignore
         x1 = i * (WIDTH / width);
         // @ts-ignore
@@ -85,37 +81,36 @@ function calc(): void {
     let minusV: number;
     let origV: number;
     let faktor: number;
-    // @ts-ignore
-    let len: number = efficiency > 0 ? efficiency : frameCount;
-    for (let j: number = 0; j < len; j++) {
+
+    for (let j: number = 0; j < 50000; j++) {
         for (let i: number = 0; i < koeffizienten.length; i++) {
-            faktor = koeffizienten[i][1];
+            //for (let k: number = 0; k < 200000; k++) {
+                faktor = koeffizienten[i][1];
 
-            origV = calcV();
-            koeffizienten[i][0] += faktor;
-            plusV = calcV();
-            koeffizienten[i][0] -= 2 * faktor;
-            minusV = calcV();
-            koeffizienten[i][0] += faktor;
-
-            if (plusV < origV) {
+                origV = calcV();
                 koeffizienten[i][0] += faktor;
-                koeffizienten[i][1] *= 2;
-            } else if (minusV < origV) {
-                koeffizienten[i][0] -= faktor;
-                koeffizienten[i][1] *= 2;
-            } else {
-                koeffizienten[i][1] *= 0.5;
-            }
+                plusV = calcV();
+                koeffizienten[i][0] -= 2 * faktor;
+                minusV = calcV();
+                koeffizienten[i][0] += faktor;
+
+                if (plusV < origV) {
+                    koeffizienten[i][0] += faktor;
+                    koeffizienten[i][1] *= 2;
+                } else if (minusV < origV) {
+                    koeffizienten[i][0] -= faktor;
+                    koeffizienten[i][1] *= 2;
+                } else {
+                    koeffizienten[i][1] *= 0.5;
+                }
+            //}
         }
     }
 }
 function calcV(): number {
     let n: number = 0;
-    let s: number;
     for (let i: number = 0; i < VALUES.length; i++) {
-        s = Math.abs(VALUES[i][1] - f(VALUES[i][0]));
-        n += quadV ? s ** 2 : s;
+        n += Math.abs(VALUES[i][1] - f(VALUES[i][0])) ** 2;
     }
     return n;
 }
