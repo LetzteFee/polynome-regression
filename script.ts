@@ -1,24 +1,25 @@
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
-const VALUES: number[][] = [
-    [9, 80],
-    [5, 50],
-    [4, 40],
-    [1, 70],
-    [0.5, 30]
-];
-const efficiency: number = 1000;
+let VALUES: number[][] = [];
+const efficiency: number = -1;
 const quadV: boolean = true;
 
 
-let koeffizienten: number[][] = [[]]; //[[ZAHL, FAKTOR]]
-let grad: number = 4;
+let koeffizienten: number[][] = []; //[[ZAHL, FAKTOR]]
 function setup(): void {
+    // @ts-ignore
+    let len: number = Math.round(random(10));
+    for (let i: number = 0; i < len; i++) {
+        // @ts-ignore
+        VALUES[i] = [Math.round(WIDTH * (i / len)), Math.round(random(HEIGHT))];
+    }
+
+
     // @ts-ignore
     createCanvas(windowWidth, windowHeight);
     // @ts-ignore
     frameRate(100);
-    for (let i: number = 0; i <= grad; i++) {
+    for (let i: number = 0; i <= VALUES.length; i++) {
         koeffizienten[i] = [10, 10];
     }
 }
@@ -29,10 +30,11 @@ function draw(): void {
     drawGraph();
     drawPlot();
     drawGUI([
+        "Werte: " + arrToString(VALUES),
         "V: " + calcV(),
         "Width: " + WIDTH,
         "Height: " + HEIGHT,
-        "Grad: " + grad,
+        "Grad: " + (koeffizienten.length - 1),
         "f(x) = " + fToString()
     ]);
     calc();
@@ -83,7 +85,9 @@ function calc(): void {
     let b: number;
     let orig: number;
     let faktor: number;
-    for (let j: number = 0; j < efficiency; j++) {
+    // @ts-ignore
+    let len: number = efficiency > 0 ? efficiency : frameCount;
+    for (let j: number = 0; j < len; j++) {
         for (let i: number = 0; i < koeffizienten.length; i++) {
             faktor = koeffizienten[i][1];
             orig = calcV();
@@ -130,4 +134,11 @@ function fToString(): string {
     }
     arr_str.reverse();
     return arr_str.join(" + ");
+}
+function arrToString(arr: number[][]): string {
+    let arr_str: string[] = [];
+    for (let i: number = 0; i < arr.length; i++) {
+        arr_str[i] = `[${arr[i][0]}, ${arr[i][1]}]`;
+    }
+    return arr_str.join(", ");
 }
