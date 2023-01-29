@@ -77,40 +77,46 @@ function drawPlot(): void {
     }
 }
 function calc(): void {
+    for (let j: number = 0; j < 50000; j++) {
+        for (let i: number = 0; i < koeffizienten.length; i++) {
+            improveKO(i);
+        }
+    }
+}
+function improveKO(i: number): void {
     let plusV: number;
     let minusV: number;
     let origV: number;
     let faktor: number;
 
-    for (let j: number = 0; j < 50000; j++) {
-        for (let i: number = 0; i < koeffizienten.length; i++) {
-            //for (let k: number = 0; k < 200000; k++) {
-                faktor = koeffizienten[i][1];
+    faktor = koeffizienten[i][1];
 
-                origV = calcV();
-                koeffizienten[i][0] += faktor;
-                plusV = calcV();
-                koeffizienten[i][0] -= 2 * faktor;
-                minusV = calcV();
-                koeffizienten[i][0] += faktor;
+    origV = calcV();
+    koeffizienten[i][0] += faktor;
+    plusV = calcV();
+    koeffizienten[i][0] -= 2 * faktor;
+    minusV = calcV();
+    koeffizienten[i][0] += faktor;
 
-                if (plusV < origV) {
-                    koeffizienten[i][0] += faktor;
-                    koeffizienten[i][1] *= 2;
-                } else if (minusV < origV) {
-                    koeffizienten[i][0] -= faktor;
-                    koeffizienten[i][1] *= 2;
-                } else {
-                    koeffizienten[i][1] *= 0.5;
-                }
-            //}
-        }
+    if (plusV < origV) {
+        koeffizienten[i][0] += faktor;
+        koeffizienten[i][1] *= 2;
+        //improveKO(i);
+    } else if (minusV < origV) {
+        koeffizienten[i][0] -= faktor;
+        koeffizienten[i][1] *= 2;
+        //improveKO(i);
+    } else {
+        if (koeffizienten[i][1] * 0.5 > 0) koeffizienten[i][1] *= 0.5;
+        if (koeffizienten[i][1] <= 0) throw "Fatal Error: KO zero";
     }
 }
 function calcV(): number {
     let n: number = 0;
+    let linearDelta: number;
     for (let i: number = 0; i < VALUES.length; i++) {
-        n += Math.abs(VALUES[i][1] - f(VALUES[i][0])) ** 2;
+        linearDelta = Math.abs(VALUES[i][1] - f(VALUES[i][0]));
+        n += linearDelta ** 2;
     }
     return n;
 }
@@ -119,7 +125,7 @@ function drawGUI(inp: string[]): void {
         // @ts-ignore
         fill(0);
         // @ts-ignore
-        text(inp[i], 10, 10 + 20 * i);
+        text(inp[i], 5, 15 + 20 * i);
     }
 }
 function fToString(): string {
