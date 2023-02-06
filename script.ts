@@ -28,7 +28,7 @@ function draw(): void {
     drawGraph();
     drawPlot();
     drawGUI([
-        "Werte: " + arrToString(VALUES),
+        `Werte (${VALUES_LENGTH}):  + ${arrToString(VALUES)}`,
         "V: " + calcV(),
         "Width: " + WIDTH,
         "Height: " + HEIGHT,
@@ -71,7 +71,7 @@ function drawPoint(x: number, y: number): void {
     // @ts-ignore
     fill('red');
     // @ts-ignore
-    ellipse(x, height - y, 4);
+    ellipse(x, height - y, 6);
 }
 function drawPlot(): void {
     for (let i: number = 0; i < VALUES.length; i++) {
