@@ -8,7 +8,7 @@ let VALUES: number[][] = [];
 let koeffizienten: number[][] = []; //[[ZAHL, FAKTOR]]
 function setup(): void {
     // @ts-ignore
-    if(VALUES_LENGTH < 0) VALUES_length = Math.round(random(10));
+    if (VALUES_LENGTH < 0) VALUES_length = Math.round(random(10));
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
         // @ts-ignore
         VALUES[i] = [Math.round(WIDTH * (i / (VALUES_LENGTH - 1))), Math.round(random(HEIGHT))];
@@ -35,7 +35,8 @@ function draw(): void {
         "Grad: " + GRADE,
         "f(x) = " + fToString()
     ]);
-    calc();
+    // @ts-ignore
+    if (frameCount > 1) calc();
 }
 function f(x: number): number {
     let sum = 0;
@@ -86,18 +87,15 @@ function calc(): void {
     }
 }
 function improveKO(i: number): void {
-    let plusV: number;
-    let minusV: number;
-    let origV: number;
-    let faktor: number;
+    let faktor: number = koeffizienten[i][1];
 
-    faktor = koeffizienten[i][1];
-
-    origV = calcV();
+    let origV: number = calcV();
     koeffizienten[i][0] += faktor;
-    plusV = calcV();
+
+    let plusV: number = calcV();
     koeffizienten[i][0] -= 2 * faktor;
-    minusV = calcV();
+
+    let minusV: number = calcV();
     koeffizienten[i][0] += faktor;
 
     if (plusV < origV) {
@@ -107,7 +105,7 @@ function improveKO(i: number): void {
         koeffizienten[i][0] -= faktor;
         koeffizienten[i][1] *= 2;
     } else if (koeffizienten[i][1] * 0.5 > 0) {
-	koeffizienten[i][1] *= 0.5;
+        koeffizienten[i][1] *= 0.5;
     }
 }
 function calcV(): number {
