@@ -103,14 +103,11 @@ function improveKO(i: number): void {
     if (plusV < origV) {
         koeffizienten[i][0] += faktor;
         koeffizienten[i][1] *= 2;
-        //improveKO(i);
     } else if (minusV < origV) {
         koeffizienten[i][0] -= faktor;
         koeffizienten[i][1] *= 2;
-        //improveKO(i);
-    } else {
-        if (koeffizienten[i][1] * 0.5 > 0) koeffizienten[i][1] *= 0.5;
-        if (koeffizienten[i][1] <= 0) throw "Fatal Error: KO zero";
+    } else if (koeffizienten[i][1] * 0.5 > 0) {
+	koeffizienten[i][1] *= 0.5;
     }
 }
 function calcV(): number {
