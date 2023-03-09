@@ -12,8 +12,6 @@ function setup(): void {
         VALUES[i] = [getRandom(0, WIDTH), getRandom(0, HEIGHT)];
     }
 
-
-    // @ts-ignore
     createCanvas(windowWidth, windowHeight);
     for (let i: number = 0; i <= GRADE; i++) {
         koeffizienten[i] = [0, 1];
@@ -21,7 +19,6 @@ function setup(): void {
 }
 
 function draw(): void {
-    // @ts-ignore
     background(220);
     drawGraph();
     drawPlot();
@@ -33,7 +30,6 @@ function draw(): void {
         "Grad: " + GRADE,
         "f(x) = " + fToString()
     ]);
-    // @ts-ignore
     if (frameCount > 1) calc();
 }
 function f(x: number): number {
@@ -48,28 +44,18 @@ function drawGraph(): void {
     let x2: number;
     let y1: number;
     let y2: number;
-    // @ts-ignore
     for (let i = 0; i < width; i++) {
-        // @ts-ignore
         x1 = i * (WIDTH / width);
-        // @ts-ignore
         x2 = (i + 1) * (WIDTH / width);
-        // @ts-ignore
         y1 = f(x1) * (height / HEIGHT);
-        // @ts-ignore
         y2 = f(x2) * (height / HEIGHT);
-        // @ts-ignore
         line(i, height - y1, i + 1, height - y2);
     }
 }
 function drawPoint(x: number, y: number): void {
-    // @ts-ignore
     x *= width / WIDTH;
-    // @ts-ignore
     y *= height / HEIGHT;
-    // @ts-ignore
     fill('red');
-    // @ts-ignore
     ellipse(x, height - y, 6);
 }
 function drawPlot(): void {
@@ -117,9 +103,7 @@ function calcV(): number {
 }
 function drawGUI(inp: string[]): void {
     for (let i: number = 0; i < inp.length; i++) {
-        // @ts-ignore
         fill(0);
-        // @ts-ignore
         text(inp[i], 5, 15 + 20 * i);
     }
 }
