@@ -1,17 +1,15 @@
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 const GRADE: number = 5;
-let VALUES_LENGTH: number = 10;
+let VALUES_LENGTH: number = 6;
 
 let VALUES: number[][] = [];
 
 let koeffizienten: number[][] = []; //[[ZAHL, FAKTOR]]
 function setup(): void {
-    // @ts-ignore
-    if (VALUES_LENGTH < 0) VALUES_length = Math.round(random(10));
+    if (VALUES_LENGTH < 0) VALUES_LENGTH = Math.round(getRandom(1, 10));
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
-        // @ts-ignore
-        VALUES[i] = [Math.round(WIDTH * (i / (VALUES_LENGTH - 1))), Math.round(random(HEIGHT))];
+        VALUES[i] = [getRandom(0, WIDTH), getRandom(0, HEIGHT)];
     }
 
 
@@ -28,7 +26,7 @@ function draw(): void {
     drawGraph();
     drawPlot();
     drawGUI([
-        `Werte (${VALUES_LENGTH}):  + ${arrToString(VALUES)}`,
+        `Werte (${VALUES_LENGTH}): ${arrToString(VALUES)}`,
         "V: " + calcV(),
         "Width: " + WIDTH,
         "Height: " + HEIGHT,
@@ -140,4 +138,8 @@ function arrToString(arr: number[][]): string {
         arr_str[i] = `[${arr[i][0]}, ${arr[i][1]}]`;
     }
     return arr_str.join(", ");
+}
+function getRandom(min: number = 0, max: number = 100): number {
+    if (min >= max) return min;
+    return min + Math.random() * (max - min);
 }
