@@ -8,9 +8,9 @@ let VALUES: number[][] = [];
 
 let koeffizienten: number[][] = []; //[[ZAHL, FAKTOR]]
 function setup(): void {
-    if (VALUES_LENGTH < 0) VALUES_LENGTH = Math.round(getRandom(1, 10));
+    if (VALUES_LENGTH < 0) VALUES_LENGTH = Math.round(random(1, 10));
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
-        VALUES[i] = [Math.round(random(WIDTH)), Math.round(random(HEIGHT))];
+        VALUES[i] = [WIDTH / VALUES_LENGTH * i + (WIDTH / VALUES_LENGTH * 0.5), Math.round(random(HEIGHT))];
     }
 
     createCanvas(windowWidth, windowHeight);
@@ -124,7 +124,6 @@ function arrToString(arr: number[][]): string {
     }
     return arr_str.join(", ");
 }
-function getRandom(min: number = 0, max: number = 100): number {
-    if (min >= max) return min;
-    return min + Math.random() * (max - min);
-}
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+  }
