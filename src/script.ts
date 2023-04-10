@@ -2,6 +2,7 @@ const WIDTH: number = 10;
 const HEIGHT: number = 100;
 const GRADE: number = 5;
 let VALUES_LENGTH: number = 6;
+let SPEED: number = 5000;
 
 let VALUES: number[][] = [];
 
@@ -9,7 +10,7 @@ let koeffizienten: number[][] = []; //[[ZAHL, FAKTOR]]
 function setup(): void {
     if (VALUES_LENGTH < 0) VALUES_LENGTH = Math.round(getRandom(1, 10));
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
-        VALUES[i] = [getRandom(0, WIDTH), getRandom(0, HEIGHT)];
+        VALUES[i] = [Math.round(random(WIDTH)), Math.round(random(HEIGHT))];
     }
 
     createCanvas(windowWidth, windowHeight);
@@ -24,11 +25,11 @@ function draw(): void {
     drawPlot();
     drawGUI([
         `Werte (${VALUES_LENGTH}): ${arrToString(VALUES)}`,
-        "V: " + calcV(),
-        "Width: " + WIDTH,
-        "Height: " + HEIGHT,
-        "Grad: " + GRADE,
-        "f(x) = " + fToString()
+        `Delta: ${calcV()}`,
+        `Width: ${WIDTH}`,
+        `Height: ${HEIGHT}`,
+        `Grad: ${GRADE}`,
+        `f(x) = ${fToString()}`
     ]);
     if (frameCount > 1) calc();
 }
@@ -64,7 +65,7 @@ function drawPlot(): void {
     }
 }
 function calc(): void {
-    for (let j: number = 0; j < 5000; j++) {
+    for (let j: number = 0; j < SPEED; j++) {
         for (let i: number = 0; i < koeffizienten.length; i++) {
             improveKO(i);
         }
