@@ -1,16 +1,15 @@
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 const GRADE: number = 5;
-let VALUES_LENGTH: number = 6;
 let SPEED: number = 5000;
 
 let VALUES: number[][] = [];
 
 let koeffizienten: number[][] = []; //[[ZAHL, FAKTOR]]
 function setup(): void {
-    if (VALUES_LENGTH < 0) VALUES_LENGTH = Math.round(random(1, 10));
+    let VALUES_LENGTH: number = 6;
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
-        VALUES[i] = [WIDTH / VALUES_LENGTH * i + WIDTH / VALUES_LENGTH * 0.5, Math.round(random(HEIGHT))];
+        VALUES[i] = [WIDTH / VALUES_LENGTH * i + WIDTH / VALUES_LENGTH * 0.5, random(HEIGHT)];
     }
 
     createCanvas(windowWidth, windowHeight);
@@ -24,7 +23,7 @@ function draw(): void {
     drawGraph();
     drawPlot();
     drawGUI([
-        `Werte (${VALUES_LENGTH}): ${arrToString(VALUES)}`,
+        `Werte (${VALUES.length}): ${arrToString(VALUES)}`,
         `Delta: ${calcV()}`,
         `Width: ${WIDTH}`,
         `Height: ${HEIGHT}`,
