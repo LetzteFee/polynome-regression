@@ -142,7 +142,11 @@ let funktionen: Polynom[] = [];
 
 function setup(): void {
     let GRAD: number = 6;
-    funktionen = [new Polynom(GRAD, 2, "red"), new Polynom(GRAD, 3, "green")];
+    funktionen = [
+        new Polynom(GRAD, 1, "yellow"),
+        new Polynom(GRAD, 2, "red"),
+        new Polynom(GRAD, 3, "green")
+    ];
 
     let VALUES_LENGTH: number = GRAD + 1;
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
