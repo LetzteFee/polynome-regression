@@ -5,17 +5,20 @@ class Point {
         this.x = x;
         this.y = y;
     }
-    public calcDelta(): number {
-        return Math.abs(this.y - koeffizienten.f(this.x)) ** 2;
-    }
     public draw(): void {
+        let x: number = this.x * (width / WIDTH);
+        let y: number = height - (this.y * (height / HEIGHT));
+
         noStroke();
         fill('red');
-        ellipse(
-            this.x * (width / WIDTH),
-            height - (this.y * (height / HEIGHT)),
-            5
-        );
+        ellipse(x, y, 5);
+    }
+    public drawLinearDelta(funk: Polynom): void {
+        let x: number = this.x * (width / WIDTH);
+        let y: number = height - (this.y * (height / HEIGHT));
+
+        stroke(0);
+        line(x, y, x, height - (funk.f(this.x) * (height / HEIGHT)));
     }
     public toString(): string {
         let x: number = Math.round(this.x);
@@ -40,14 +43,14 @@ class Koeffizient {
     private decreaseSum(): void {
         this.sum *= 0.5;
     }
-    public improve(): void {
-        let origV: number = calcCompleteDelta();
-        
+    public improve(funk: Polynom): void {
+        let origV: number = funk.calcCompleteDelta();
+
         this.value += this.sum;
-        let plusV: number = calcCompleteDelta();
-       
+        let plusV: number = funk.calcCompleteDelta();
+
         this.value -= 2 * this.sum;
-        let minusV: number = calcCompleteDelta();
+        let minusV: number = funk.calcCompleteDelta();
 
         this.value += this.sum;
 
@@ -59,16 +62,16 @@ class Koeffizient {
             this.increaseSum();
         } else if (this.sum * 0.5 > 0) {
             this.decreaseSum();
-            this.improve();
+            this.improve(funk);
         } else {
             this.resetSum();
         }
     }
 }
 
-class Koeffizienten {
+class Polynom {
     private arr: Koeffizient[];
-    constructor(){
+    constructor() {
         this.arr = [];
         for (let i: number = 0; i <= GRADE; i++) {
             this.arr.push(new Koeffizient(0, 1));
@@ -77,7 +80,7 @@ class Koeffizienten {
     public improve(): void {
         for (let j: number = 0; j < SPEED; j++) {
             for (let i: number = 0; i < this.arr.length; i++) {
-                this.arr[i].improve();
+                this.arr[i].improve(this);
             }
         }
     }
@@ -96,39 +99,7 @@ class Koeffizienten {
         arr_str.reverse();
         return arr_str.join(" + ");
     }
-}
-const WIDTH: number = 10;
-const HEIGHT: number = 100;
-const GRADE: number = 6;
-let SPEED: number = 5000;
-
-let VALUES: Point[] = [];
-let koeffizienten: Koeffizienten;
-
-function setup(): void {
-    let VALUES_LENGTH: number = GRADE + 1;
-    for (let i: number = 0; i < VALUES_LENGTH; i++) {
-        VALUES.push(new Point(WIDTH / VALUES_LENGTH * i + WIDTH / VALUES_LENGTH * 0.5, random(HEIGHT)));
-    }
-
-    koeffizienten = new Koeffizienten();
-
-    createCanvas(windowWidth, windowHeight);
-}
-function draw(): void {
-    background(220);
-    render();
-    koeffizienten.improve();
-}
-function calcCompleteDelta(): number {
-    let n: number = 0;
-    for (let i: number = 0; i < VALUES.length; i++) {
-        n += VALUES[i].calcDelta();
-    }
-    return n;
-}
-function render(): void {
-    function drawGraph(): void {
+    public drawGraph(): void {
         let x1: number;
         let x2: number;
         let y1: number;
@@ -136,33 +107,67 @@ function render(): void {
         for (let i = 0; i < width; i++) {
             x1 = i * (WIDTH / width);
             x2 = (i + 1) * (WIDTH / width);
-            y1 = koeffizienten.f(x1) * (height / HEIGHT);
-            y2 = koeffizienten.f(x2) * (height / HEIGHT);
+            y1 = this.f(x1) * (height / HEIGHT);
+            y2 = this.f(x2) * (height / HEIGHT);
             stroke(0);
             line(i, height - y1, i + 1, height - y2);
         }
     }
+    public calcCompleteDelta(): number {
+        let n: number = 0;
+        for (let i: number = 0; i < VALUES.length; i++) {
+            n += Math.abs(VALUES[i].y - this.f(VALUES[i].x)) ** 2;
+        }
+        return n;
+    }
+}
+const WIDTH: number = 10;
+const HEIGHT: number = 100;
+const GRADE: number = 6;
+let SPEED: number = 5000;
+
+let VALUES: Point[] = [];
+let funktion01: Polynom;
+
+function setup(): void {
+    let VALUES_LENGTH: number = GRADE + 1;
+    for (let i: number = 0; i < VALUES_LENGTH; i++) {
+        VALUES.push(new Point(WIDTH / VALUES_LENGTH * i + WIDTH / VALUES_LENGTH * 0.5, random(HEIGHT)));
+    }
+
+    funktion01 = new Polynom();
+
+    createCanvas(windowWidth, windowHeight);
+}
+function draw(): void {
+    background(220);
+    render();
+    funktion01.improve();
+}
+function render(): void {
     function drawPlot(): void {
         for (let i: number = 0; i < VALUES.length; i++) {
             VALUES[i].draw();
+            VALUES[i].drawLinearDelta(funktion01);
         }
     }
-    
+
     function listVALUES(): string {
         return VALUES.map(v => v.toString()).join(", ");
     }
-    drawGraph();
+    funktion01.drawGraph();
     drawPlot();
 
     let inp: string[] = [
         `Werte (${VALUES.length}): ${listVALUES()}`,
-        `Delta: ${calcCompleteDelta()}`,
+        `Delta: ${funktion01.calcCompleteDelta()}`,
         `Width: ${WIDTH}`,
         `Height: ${HEIGHT}`,
         `Grad: ${GRADE}`,
-        `f(x) = ${koeffizienten.fToString()}`
+        `f(x) = ${funktion01.fToString()}`
     ]
     for (let i: number = 0; i < inp.length; i++) {
+        noStroke();
         fill(0);
         text(inp[i], 5, 15 + 20 * i);
     }
