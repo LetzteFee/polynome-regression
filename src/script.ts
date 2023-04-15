@@ -18,7 +18,9 @@ class Point {
         );
     }
     public toString(): string {
-        return `(${this.x}, ${this.y})`;
+        let x: number = Math.round(this.x);
+        let y: number = Math.round(this.y);
+        return `(${x}, ${y})`;
     }
 }
 
@@ -89,7 +91,7 @@ function setup(): void {
 }
 function draw(): void {
     background(220);
-    drawGUI();
+    render();
 
     for (let j: number = 0; j < SPEED; j++) {
         for (let i: number = 0; i < koeffizienten.length; i++) {
@@ -111,7 +113,7 @@ function calcCompleteDelta(): number {
     }
     return n;
 }
-function drawGUI(): void {
+function render(): void {
     function drawGraph(): void {
         let x1: number;
         let x2: number;
@@ -139,12 +141,14 @@ function drawGUI(): void {
         arr_str.reverse();
         return arr_str.join(" + ");
     }
-
+    function listVALUES(): string {
+        return VALUES.map(v => v.toString()).join(", ");
+    }
     drawGraph();
     drawPlot();
 
     let inp: string[] = [
-        `Werte (${VALUES.length}): ${VALUES.map(v => v.toString()).join(", ")}`,
+        `Werte (${VALUES.length}): ${listVALUES()}`,
         `Delta: ${calcCompleteDelta()}`,
         `Width: ${WIDTH}`,
         `Height: ${HEIGHT}`,
