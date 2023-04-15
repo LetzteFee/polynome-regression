@@ -1,41 +1,101 @@
+class Point {
+    readonly x: number;
+    readonly y: number;
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+    public calcDelta(): number {
+        return Math.abs(this.y - f(this.x)) ** 2;
+    }
+    public draw(): void {
+        noStroke();
+        fill('red');
+        ellipse(
+            this.x * (width / WIDTH),
+            height - (this.y * (height / HEIGHT)),
+            5
+        );
+    }
+    public toString(): string {
+        return `(${this.x}, ${this.y})`;
+    }
+}
+
+class Koeffizient {
+    public value: number;
+    public sum: number;
+    private resets: number;
+    constructor(v: number, sum: number) {
+        this.value = v;
+        this.sum = sum;
+
+        this.resets = 0;
+    }
+    private resetSum() {
+        this.sum = 1;
+        this.resets++;
+        console.log(this.resets);
+    }
+    public improve(): void {
+        let origV: number = calcCompleteDelta();
+        this.value += this.sum;
+
+        let plusV: number = calcCompleteDelta();
+        this.value -= 2 * this.sum;
+
+        let minusV: number = calcCompleteDelta();
+        this.value += this.sum;
+
+        if (plusV < origV) {
+            this.value += this.sum;
+            this.sum *= 2;
+        } else if (minusV < origV) {
+            this.value -= this.sum;
+            this.sum *= 2;
+        } else if (this.sum * 0.5 > 0) {
+            this.sum *= 0.5;
+        } else {
+            this.resetSum();
+        }
+    }
+}
+
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 const GRADE: number = 5;
 let SPEED: number = 5000;
 
-let VALUES: number[][] = [];
+let VALUES: Point[] = [];
+let koeffizienten: Koeffizient[] = [];
 
-let koeffizienten: number[][] = []; //[[ZAHL, FAKTOR]]
 function setup(): void {
     let VALUES_LENGTH: number = 6;
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
-        VALUES[i] = [WIDTH / VALUES_LENGTH * i + WIDTH / VALUES_LENGTH * 0.5, random(HEIGHT)];
+        VALUES.push(new Point(WIDTH / VALUES_LENGTH * i + WIDTH / VALUES_LENGTH * 0.5, random(HEIGHT)));
+    }
+
+    for (let i: number = 0; i <= GRADE; i++) {
+        koeffizienten.push(new Koeffizient(0, 1));
     }
 
     createCanvas(windowWidth, windowHeight);
-    for (let i: number = 0; i <= GRADE; i++) {
-        koeffizienten[i] = [0, 1];
-    }
 }
 
 function draw(): void {
     background(220);
-    drawGraph();
-    drawPlot();
-    drawGUI([
-        `Werte (${VALUES.length}): ${arrToString(VALUES)}`,
-        `Delta: ${calcV()}`,
-        `Width: ${WIDTH}`,
-        `Height: ${HEIGHT}`,
-        `Grad: ${GRADE}`,
-        `f(x) = ${fToString()}`
-    ]);
-    if (frameCount > 1) calc();
+    drawGUI();
+
+    for (let j: number = 0; j < SPEED; j++) {
+        for (let i: number = 0; i < koeffizienten.length; i++) {
+            koeffizienten[i].improve();
+        }
+    }
 }
 function f(x: number): number {
     let sum = 0;
     for (let i: number = 0; i < koeffizienten.length; i++) {
-        sum += koeffizienten[i][0] * (x ** i);
+        sum += koeffizienten[i].value * (x ** i);
     }
     return sum;
 }
@@ -49,66 +109,42 @@ function drawGraph(): void {
         x2 = (i + 1) * (WIDTH / width);
         y1 = f(x1) * (height / HEIGHT);
         y2 = f(x2) * (height / HEIGHT);
+        stroke(0);
         line(i, height - y1, i + 1, height - y2);
     }
 }
-function drawPoint(x: number, y: number): void {
-    x *= width / WIDTH;
-    y *= height / HEIGHT;
-    fill('red');
-    ellipse(x, height - y, 6);
-}
+
 function drawPlot(): void {
     for (let i: number = 0; i < VALUES.length; i++) {
-        drawPoint(VALUES[i][0], VALUES[i][1]);
+        VALUES[i].draw();
     }
 }
-function calc(): void {
-    for (let j: number = 0; j < SPEED; j++) {
-        for (let i: number = 0; i < koeffizienten.length; i++) {
-            improveKO(i);
-        }
-    }
-}
-function improveKO(i: number): void {
-    let faktor: number = koeffizienten[i][1];
-
-    let origV: number = calcV();
-    koeffizienten[i][0] += faktor;
-
-    let plusV: number = calcV();
-    koeffizienten[i][0] -= 2 * faktor;
-
-    let minusV: number = calcV();
-    koeffizienten[i][0] += faktor;
-
-    if (plusV < origV) {
-        koeffizienten[i][0] += faktor;
-        koeffizienten[i][1] *= 2;
-    } else if (minusV < origV) {
-        koeffizienten[i][0] -= faktor;
-        koeffizienten[i][1] *= 2;
-    } else if (koeffizienten[i][1] * 0.5 > 0) {
-        koeffizienten[i][1] *= 0.5;
-    }
-}
-function calcV(): number {
+function calcCompleteDelta(): number {
     let n: number = 0;
-    let linearDelta: number;
     for (let i: number = 0; i < VALUES.length; i++) {
-        linearDelta = Math.abs(VALUES[i][1] - f(VALUES[i][0]));
-        n += linearDelta ** 2;
+        n += VALUES[i].calcDelta();
     }
     return n;
 }
-function drawGUI(inp: string[]): void {
+function drawGUI(): void {
+    drawGraph();
+    drawPlot();
+
+    let inp: string[] = [
+        `Werte (${VALUES.length}): ${listVALUES()}`,
+        `Delta: ${calcCompleteDelta()}`,
+        `Width: ${WIDTH}`,
+        `Height: ${HEIGHT}`,
+        `Grad: ${GRADE}`,
+        `f(x) = ${fToString()}`
+    ]
     for (let i: number = 0; i < inp.length; i++) {
         fill(0);
         text(inp[i], 5, 15 + 20 * i);
     }
 }
 function fToString(): string {
-    let arr: number[] = koeffizienten.map(function (v: number[]): number { return v[0] });
+    let arr: number[] = koeffizienten.map(function (v: Koeffizient): number { return v.value });
     let arr_str: string[] = [];
     for (let i: number = 0; i < arr.length; i++) {
         arr_str[i] = Math.round(arr[i]) + "x^" + i;
@@ -116,13 +152,9 @@ function fToString(): string {
     arr_str.reverse();
     return arr_str.join(" + ");
 }
-function arrToString(arr: number[][]): string {
-    let arr_str: string[] = [];
-    for (let i: number = 0; i < arr.length; i++) {
-        arr_str[i] = `[${arr[i][0]}, ${arr[i][1]}]`;
-    }
-    return arr_str.join(", ");
+function listVALUES(): string {
+    return VALUES.map(v => v.toString()).join(", ");
 }
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
-  }
+}
