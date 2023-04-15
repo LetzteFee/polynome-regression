@@ -71,13 +71,16 @@ class Koeffizient {
 
 class Polynom {
     private arr: Koeffizient[];
-    private expo: number;
-    constructor(grad: number, expo: number = 2) {
-        this.expo = expo;
+    private delta_expo: number;
+    private readonly color: string;
+    constructor(grad: number, expo: number, color: string) {
         this.arr = [];
         for (let i: number = 0; i <= grad; i++) {
             this.arr.push(new Koeffizient(0, 1));
         }
+
+        this.delta_expo = expo;
+        this.color = color;
     }
     public improve(data: Point[]): void {
         for (let j: number = 0; j < 5000; j++) {
@@ -107,11 +110,11 @@ class Polynom {
             let x2: number = (i + 1) * (WIDTH / width);
             let y1: number = this.f(x1) * (height / HEIGHT);
             let y2: number = this.f(x2) * (height / HEIGHT);
-            stroke(0);
+            stroke(this.color);
             line(i, height - y1, i + 1, height - y2);
         }
     }
-    public calcCompleteDelta(data: Point[], expo: number = this.expo): number {
+    public calcCompleteDelta(data: Point[], expo: number = this.delta_expo): number {
         let n: number = 0;
         for (let i: number = 0; i < data.length; i++) {
             n += Math.abs(data[i].y - this.f(data[i].x)) ** expo;
@@ -121,16 +124,25 @@ class Polynom {
     public getGrad(): number {
         return this.arr.length - 1;
     }
+    public getExpo(): number {
+        return this.delta_expo;
+    }
+    public getColor(): string {
+        return this.color;
+    }
+    public toString(): string {
+        return `${this.getColor()}: Grad: ${this.getGrad()}, Delta-Expo: ${this.getExpo()}, LinearDelta: ${this.calcCompleteDelta(VALUES, 1)}`;
+    }
 }
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 
 let VALUES: Point[] = [];
-let funktion01: Polynom;
+let funktionen: Polynom[] = [];
 
 function setup(): void {
     let GRAD: number = 6;
-    funktion01 = new Polynom(GRAD);
+    funktionen = [new Polynom(GRAD, 2, "red"), new Polynom(GRAD, 3, "green")];
 
     let VALUES_LENGTH: number = GRAD + 1;
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
@@ -142,27 +154,31 @@ function setup(): void {
 function draw(): void {
     background(220);
     render();
-    funktion01.improve(VALUES);
+    for (let i = 0; i < funktionen.length; i++) {
+        funktionen[i].improve(VALUES);
+    }
 }
 function render(): void {
     for (let i: number = 0; i < VALUES.length; i++) {
         VALUES[i].draw();
-        VALUES[i].drawLinearDelta(funktion01);
+        //VALUES[i].drawLinearDelta(funktion01);
     }
-    funktion01.drawGraph();
+    for (let i = 0; i < funktionen.length; i++) {
+        funktionen[i].drawGraph();
+    }
 
-    let zeilen: string[] = [
+    /*let zeilen: string[] = [
         `Punkte (${VALUES.length}): ${VALUES.map(v => v.toString()).join(", ")}`,
         `Delta: ${funktion01.calcCompleteDelta(VALUES)}`,
         `Width: ${WIDTH}`,
         `Height: ${HEIGHT}`,
         `Grad: ${funktion01.getGrad()}`,
         `f(x) = ${funktion01.fToString()}`
-    ]
-    for (let i: number = 0; i < zeilen.length; i++) {
+    ]*/
+    for (let i: number = 0; i < funktionen.length; i++) {
         noStroke();
         fill(0);
-        text(zeilen[i], 5, 15 + 20 * i);
+        text(funktionen[i].toString(), 5, 15 + 20 * i);
     }
 }
 function windowResized(): void {
