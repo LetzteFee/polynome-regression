@@ -7,6 +7,7 @@ declare var frameCount: number;
 declare function createCanvas(n1: number, n2: number): void;
 declare function resizeCanvas(n1: number, n2: number): void;
 declare function background(n: number): void;
+declare function noStroke(): void;
 declare function stroke(n: number): void;
 declare function strokeWeight(n: number): void;
 declare function fill(v: any): void;
