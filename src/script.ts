@@ -63,6 +63,7 @@ class Koeffizient {
             this.increaseSum();
         } else if (this.sum * 0.5 > 0) {
             this.decreaseSum();
+            this.improve();
         } else {
             this.resetSum();
         }
@@ -71,14 +72,14 @@ class Koeffizient {
 
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
-const GRADE: number = 5;
+const GRADE: number = 6;
 let SPEED: number = 5000;
 
 let VALUES: Point[] = [];
 let koeffizienten: Koeffizient[] = [];
 
 function setup(): void {
-    let VALUES_LENGTH: number = 6;
+    let VALUES_LENGTH: number = GRADE + 1;
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
         VALUES.push(new Point(WIDTH / VALUES_LENGTH * i + WIDTH / VALUES_LENGTH * 0.5, random(HEIGHT)));
     }
