@@ -27,17 +27,12 @@ class Point {
 class Koeffizient {
     public value: number;
     public sum: number;
-    private resets: number;
     constructor(v: number, sum: number) {
         this.value = v;
         this.sum = sum;
-
-        this.resets = 0;
     }
     private resetSum(): void {
         this.sum = 1;
-        this.resets++;
-        console.log(this.resets);
     }
     private increaseSum(): void {
         this.sum *= 2;
