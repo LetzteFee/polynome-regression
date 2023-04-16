@@ -27,7 +27,7 @@ class Point {
 type Plot = Point[];
 class Koeffizient {
     public value: number;
-    public sum: number;
+    private sum: number;
     private resets: number;
     constructor(v: number, sum: number) {
         this.value = v;
@@ -36,12 +36,15 @@ class Koeffizient {
     }
     public resetSum(): void {
         this.sum = this.resets ** 2;
+        this.resets++;
     }
     public increaseSum(): void {
         this.sum *= 2;
     }
     public decreaseSum(): void {
-        this.sum *= 0.5;
+        if (this.sumIsHighEnough()) {
+            this.sum *= 0.5;
+        }
     }
     public increaseValue(): void {
         this.value += this.sum;
@@ -108,7 +111,8 @@ class Polynom {
             this.arr[index].decreaseSum();
             //this.improveSpecificKO(index);
         } else {
-            this.arr[index].resetSum();
+            //this.arr[index].resetSum();
+            this.arr[index].increaseSum();
         }
     }
     public f(x: number): number {
