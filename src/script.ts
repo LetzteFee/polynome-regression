@@ -146,12 +146,12 @@ let VALUES: Point[] = [];
 let funktionen: Polynom[] = [];
 
 function setup(): void {
-    let GRAD: number = 5;
+    let GRAD: number = 6;
     funktionen = [
         //new Polynom(GRAD, 1, {r: 0, g: 0, b: 0}),
-        new Polynom(GRAD, 2, {r: 0, g: 255, b: 0}),
+        new Polynom(GRAD, 2, { r: 0, g: 255, b: 0 }),
         //new Polynom(GRAD, 3, {r: 255, g: 0, b: 0}),
-        new Polynom(GRAD, 4, {r: 0, g: 0, b: 255})
+        new Polynom(GRAD, 4, { r: 0, g: 0, b: 255 })
     ];
 
     let VALUES_LENGTH: number = GRAD + 1;
@@ -171,7 +171,9 @@ function draw(): void {
 function render(): void {
     for (let i: number = 0; i < VALUES.length; i++) {
         VALUES[i].draw();
-        //VALUES[i].drawLinearDelta(funktion01);
+        for (let j: number = 0; j < funktionen.length; j++) {
+            VALUES[i].drawLinearDelta(funktionen[j]);
+        }
     }
     for (let i = 0; i < funktionen.length; i++) {
         funktionen[i].drawGraph();
