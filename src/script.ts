@@ -4,8 +4,8 @@ interface color {
     b: number;
 }
 class Point {
-    readonly x: number;
-    readonly y: number;
+    public readonly x: number;
+    public readonly y: number;
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
@@ -49,7 +49,7 @@ class Koeffizient {
     public decreaseValue(): void {
         this.value -= this.sum;
     }
-    public sumHighEnough(): boolean {
+    public sumIsHighEnough(): boolean {
         return this.sum * 0.5 > 0;
     }
 }
@@ -84,7 +84,7 @@ class Polynom {
             }
         }
     }
-    public improveSpecificKO(index: number): void {
+    private improveSpecificKO(index: number): void {
         let origDelta: number = this.calcCompleteDelta();
         let origValue: number = this.arr[index].value;
         let plusDelta: number;
@@ -104,7 +104,7 @@ class Polynom {
         } else if (minusDelta < origDelta) {
             this.arr[index].decreaseValue();
             this.arr[index].increaseSum();
-        } else if (this.arr[index].sumHighEnough()) {
+        } else if (this.arr[index].sumIsHighEnough()) {
             this.arr[index].decreaseSum();
             //this.improveSpecificKO(index);
         } else {
