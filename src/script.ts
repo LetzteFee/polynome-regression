@@ -1,7 +1,7 @@
 interface color {
-    r: number,
-    g: number,
-    b: number
+    r: number;
+    g: number;
+    b: number;
 }
 class Point {
     readonly x: number;
@@ -15,7 +15,7 @@ class Point {
         let y: number = height - (this.y * (height / HEIGHT));
 
         noStroke();
-        fill('red');
+        fill("red");
         ellipse(x, y, 5);
     }
     public toString(): string {
@@ -60,7 +60,13 @@ class Polynom {
     private delta_expo: number;
     public readonly color: color;
     private calculationsPerCall: number;
-    constructor(grad: number, expo: number, color: color, data: Plot, depth: number) {
+    constructor(
+        grad: number,
+        expo: number,
+        color: color,
+        data: Plot,
+        depth: number,
+    ) {
         this.training_data = data;
         this.arr = [];
         for (let i: number = 0; i <= grad; i++) {
@@ -82,7 +88,7 @@ class Polynom {
         let origDelta: number = this.calcCompleteDelta();
         let origValue: number = this.arr[index].value;
         let plusDelta: number;
-        let minusDelta: number
+        let minusDelta: number;
 
         this.arr[index].increaseValue();
         plusDelta = this.calcCompleteDelta();
@@ -136,13 +142,20 @@ class Polynom {
             let y: number = height - (this.training_data[i].y * (height / HEIGHT));
 
             stroke(0);
-            line(x, y, x, height - this.f(this.training_data[i].x) * (height / HEIGHT));
+            line(
+                x,
+                y,
+                x,
+                height - this.f(this.training_data[i].x) * (height / HEIGHT),
+            );
         }
     }
     public calcCompleteDelta(expo: number = this.delta_expo): number {
         let n: number = 0;
         for (let i: number = 0; i < this.training_data.length; i++) {
-            n += Math.abs(this.training_data[i].y - this.f(this.training_data[i].x)) ** expo;
+            n +=
+                Math.abs(this.training_data[i].y - this.f(this.training_data[i].x)) **
+                expo;
         }
         return n;
     }
@@ -159,8 +172,8 @@ class Polynom {
         return this.delta_expo;
     }
     /*public colorToString(): string {
-        return `r: ${this.color.r} g: ${this.color.g} b: ${this.color.b}`;
-    }*/
+          return `r: ${this.color.r} g: ${this.color.g} b: ${this.color.b}`;
+      }*/
     public toString(): string {
         return `Grad: ${this.getGrad()}, Delta-Expo: ${this.getExpo()}, Delta: ${this.calcCompleteDelta()}, LinearDelta: ${this.calcCompleteLinearDelta()}`;
     }
@@ -175,7 +188,9 @@ function setup(): void {
     const GRAD: number = 6;
     const VALUES_LENGTH: number = GRAD + 1;
     for (let i: number = 0; i < VALUES_LENGTH; i++) {
-        VALUES.push(new Point(WIDTH / VALUES_LENGTH * i + WIDTH / VALUES_LENGTH * 0.5, random(HEIGHT)));
+        let x: number = WIDTH / VALUES_LENGTH * i;
+        x += WIDTH / VALUES_LENGTH * 0.5;
+        VALUES.push(new Point(x, random(HEIGHT)));
     }
 
     funktionen = [
