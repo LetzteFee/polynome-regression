@@ -143,9 +143,9 @@ let funktionen: Polynom[] = [];
 function setup(): void {
     let GRAD: number = 6;
     funktionen = [
-        new Polynom(GRAD, 1, "yellow"),
-        new Polynom(GRAD, 2, "red"),
-        new Polynom(GRAD, 3, "green")
+        new Polynom(GRAD, 2, "green"),
+        new Polynom(GRAD, 3, "red"),
+        new Polynom(GRAD, 4, "blue")
     ];
 
     let VALUES_LENGTH: number = GRAD + 1;
