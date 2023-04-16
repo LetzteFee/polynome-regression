@@ -47,8 +47,8 @@ class Koeffizient {
     public decreaseValue(): void {
         this.value -= this.sum;
     }
-    public sumTooLow(): boolean {
-        return !(this.sum * 0.5 > 0);
+    public sumHighEnough(): boolean {
+        return this.sum * 0.5 > 0;
     }
 }
 
@@ -72,24 +72,24 @@ class Polynom {
     public improve(): void {
         for (let j: number = 0; j < this.calculationsPerCall; j++) {
             for (let i: number = 0; i < this.arr.length; i++) {
-                let origV: number = this.calcCompleteDelta();
+                let origD: number = this.calcCompleteDelta();
+                let origV: number = this.arr[i].value;
 
                 this.arr[i].increaseValue();
-                let plusV: number = this.calcCompleteDelta();
-                this.arr[i].decreaseValue();
+                let plusD: number = this.calcCompleteDelta();
+                this.arr[i].value = origV;
 
                 this.arr[i].decreaseValue();
-                let minusV: number = this.calcCompleteDelta();
+                let minusD: number = this.calcCompleteDelta();
+                this.arr[i].value = origV;
 
-                this.arr[i].increaseValue();
-
-                if (plusV < origV) {
+                if (plusD < origD) {
                     this.arr[i].increaseValue();
                     this.arr[i].increaseSum();
-                } else if (minusV < origV) {
+                } else if (minusD < origD) {
                     this.arr[i].decreaseValue();
                     this.arr[i].increaseSum();
-                } else if (this.arr[i].sum * 0.5 > 0) {
+                } else if (this.arr[i].sumHighEnough()) {
                     this.arr[i].decreaseSum();
                 } else {
                     this.arr[i].resetSum();
