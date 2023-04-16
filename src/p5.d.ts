@@ -9,9 +9,11 @@ declare function resizeCanvas(n1: number, n2: number): void;
 declare function background(n: number): void;
 declare function noStroke(): void;
 declare function stroke(n: number): void;
+declare function stroke(r: number, g: number, b: number): void;
 declare function stroke(n: string): void;
 declare function strokeWeight(n: number): void;
 declare function fill(v: any): void;
+declare function fill(r: number, g: number, b: number): void;
 declare function noFill(): void;
 
 declare function point(x: number, y: number): void;
