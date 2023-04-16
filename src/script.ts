@@ -1,3 +1,8 @@
+interface color {
+    r: number,
+    g: number,
+    b: number
+}
 class Point {
     readonly x: number;
     readonly y: number;
@@ -72,8 +77,8 @@ class Koeffizient {
 class Polynom {
     private arr: Koeffizient[];
     private delta_expo: number;
-    private readonly color: string;
-    constructor(grad: number, expo: number, color: string) {
+    private readonly color: color;
+    constructor(grad: number, expo: number, color: color) {
         this.arr = [];
         for (let i: number = 0; i <= grad; i++) {
             this.arr.push(new Koeffizient(0, 1));
@@ -105,12 +110,12 @@ class Polynom {
         return arr_str.join(" + ");
     }
     public drawGraph(): void {
+        stroke(this.color.r, this.color.g, this.color.b);
         for (let i = 0; i < width; i++) {
             let x1: number = i * (WIDTH / width);
             let x2: number = (i + 1) * (WIDTH / width);
             let y1: number = this.f(x1) * (height / HEIGHT);
             let y2: number = this.f(x2) * (height / HEIGHT);
-            stroke(this.color);
             line(i, height - y1, i + 1, height - y2);
         }
     }
@@ -128,7 +133,7 @@ class Polynom {
         return this.delta_expo;
     }
     public getColor(): string {
-        return this.color;
+        return `r: ${this.color.r} g: ${this.color.g} b: ${this.color.b}`;
     }
     public toString(): string {
         return `${this.getColor()}: Grad: ${this.getGrad()}, Delta-Expo: ${this.getExpo()}, LinearDelta: ${this.calcCompleteDelta(VALUES, 1)}`;
@@ -141,11 +146,12 @@ let VALUES: Point[] = [];
 let funktionen: Polynom[] = [];
 
 function setup(): void {
-    let GRAD: number = 6;
+    let GRAD: number = 5;
     funktionen = [
-        new Polynom(GRAD, 2, "green"),
-        new Polynom(GRAD, 3, "red"),
-        new Polynom(GRAD, 4, "blue")
+        //new Polynom(GRAD, 1, {r: 0, g: 0, b: 0}),
+        new Polynom(GRAD, 2, {r: 0, g: 255, b: 0}),
+        //new Polynom(GRAD, 3, {r: 255, g: 0, b: 0}),
+        new Polynom(GRAD, 4, {r: 0, g: 0, b: 255})
     ];
 
     let VALUES_LENGTH: number = GRAD + 1;
