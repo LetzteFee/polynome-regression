@@ -26,14 +26,15 @@ class Point {
 }
 type Plot = Point[];
 class Koeffizient {
-    //TODO: value should be private
-    public value: number;
+    private value: number;
     private sum: number;
     private resets: number;
+    private origValue: number;
     constructor(v: number, sum: number) {
         this.value = v;
         this.sum = sum;
         this.resets = 1;
+        this.origValue = 0;
     }
     public resetSum(): void {
         this.sum = this.resets ** 2;
@@ -47,10 +48,18 @@ class Koeffizient {
             this.sum *= 0.5;
         }
     }
+    public getValue(): number {
+        return this.value;
+    }
+    public resetValue(): void {
+        this.value = this.origValue;
+    }
     public increaseValue(): void {
+        this.origValue = this.value;
         this.value += this.sum;
     }
     public decreaseValue(): void {
+        this.origValue = this.value;
         this.value -= this.sum;
     }
     public sumIsHighEnough(): boolean {
@@ -93,17 +102,16 @@ class Polynom {
     }
     private improveSpecificKO(index: number): void {
         let origDelta: number = this.calcCompleteDelta();
-        let origValue: number = this.arr[index].value;
         let plusDelta: number;
         let minusDelta: number;
 
         this.arr[index].increaseValue();
         plusDelta = this.calcCompleteDelta();
-        this.arr[index].value = origValue;
+        this.arr[index].resetValue();
 
         this.arr[index].decreaseValue();
         minusDelta = this.calcCompleteDelta();
-        this.arr[index].value = origValue;
+        this.arr[index].resetValue();
 
         if (plusDelta < origDelta && plusDelta < minusDelta) {
             this.arr[index].increaseValue();
@@ -122,14 +130,14 @@ class Polynom {
     public f(x: number): number {
         let sum = 0;
         for (let i: number = 0; i < this.arr.length; i++) {
-            sum += this.arr[i].value * (x ** i);
+            sum += this.arr[i].getValue() * (x ** i);
         }
         return sum;
     }
     public fToString(): string {
         let arr_str: string[] = [];
         for (let i: number = 0; i < this.arr.length; i++) {
-            arr_str.push(Math.round(this.arr[i].value) + "x^" + i);
+            arr_str.push(Math.round(this.arr[i].getValue()) + "x^" + i);
         }
         arr_str.reverse();
         return arr_str.join(" + ");
@@ -211,7 +219,10 @@ class ExpoRegression {
         this.funktionPlus.drawLinearDelta();
     }
     public run(): void {
-
+        if (frameCount % 300 == 0) {
+            this.improve();
+            console.log(`Expo: ${this.value}, Sum: ${this.sum}`);
+        }
 
         this.funktionMinus.improve();
         this.funktionPlus.improve();
@@ -226,11 +237,10 @@ class ExpoRegression {
             this.origDelta = minusDelta;
         } else if (plusDelta < this.origDelta) {
             this.value = this.funktionPlus.getExpo();
-            //TODO: Logically this mutliplier does not make any sense
             this.sum *= 2;
             this.origDelta = plusDelta;
         } else {
-            this.sum /= 2;
+            this.sum /= 4;
         }
         this.genFunktionen();
     }
@@ -271,17 +281,13 @@ function setup(): void {
         VALUES.push(new Point(x, random(HEIGHT)));
     }
 
-    regression = new ExpoRegression(1, 1, VALUES, 2000);
+    regression = new ExpoRegression(2, 1, VALUES, 2000);
 
     createCanvas(windowWidth, windowHeight);
 }
 function draw(): void {
     background(220);
     render();
-    //TODO: put this in the .run() method
-    if (frameCount % 300 == 0) {
-        regression.improve();
-    }
     regression.run();
 }
 function render(): void {
