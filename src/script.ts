@@ -26,6 +26,7 @@ class Point {
 }
 type Plot = Point[];
 class Koeffizient {
+    //TODO: value should be private
     public value: number;
     private sum: number;
     private resets: number;
@@ -210,6 +211,8 @@ class ExpoRegression {
         this.funktionPlus.drawLinearDelta();
     }
     public run(): void {
+
+
         this.funktionMinus.improve();
         this.funktionPlus.improve();
     }
@@ -223,6 +226,7 @@ class ExpoRegression {
             this.origDelta = minusDelta;
         } else if (plusDelta < this.origDelta) {
             this.value = this.funktionPlus.getExpo();
+            //TODO: Logically this mutliplier does not make any sense
             this.sum *= 2;
             this.origDelta = plusDelta;
         } else {
@@ -274,6 +278,7 @@ function setup(): void {
 function draw(): void {
     background(220);
     render();
+    //TODO: put this in the .run() method
     if (frameCount % 300 == 0) {
         regression.improve();
     }
