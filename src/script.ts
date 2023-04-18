@@ -80,6 +80,9 @@ class Polynom {
         this.color = color;
         this.calculationsPerCall = depth;
     }
+    public static default(): Polynom {
+        return new Polynom(5, 4, { r: 0, g: 0, b: 0 }, [], 1);
+    }
     public improve(): void {
         for (let j: number = 0; j < this.calculationsPerCall; j++) {
             for (let i: number = 0; i < this.arr.length; i++) {
@@ -143,15 +146,11 @@ class Polynom {
     public drawLinearDelta(): void {
         for (let i: number = 0; i < this.training_data.length; i++) {
             let x: number = this.training_data[i].x * (width / WIDTH);
-            let y: number = height - (this.training_data[i].y * (height / HEIGHT));
+            let y1: number = height - (this.training_data[i].y * (height / HEIGHT));
+            let y2: number = height - (this.f(this.training_data[i].x) * (height / HEIGHT));
 
             stroke(0);
-            line(
-                x,
-                y,
-                x,
-                height - this.f(this.training_data[i].x) * (height / HEIGHT),
-            );
+            line(x, y1, x, y2);
         }
     }
     public calcCompleteDelta(expo: number = this.delta_expo): number {
@@ -176,17 +175,88 @@ class Polynom {
         return this.delta_expo;
     }
     /*public colorToString(): string {
-          return `r: ${this.color.r} g: ${this.color.g} b: ${this.color.b}`;
-      }*/
+            return `r: ${this.color.r} g: ${this.color.g} b: ${this.color.b}`;
+        }*/
     public toString(): string {
         return `Grad: ${this.getGrad()}, Delta-Expo: ${this.getExpo()}, Delta: ${this.calcCompleteDelta()}, LinearDelta: ${this.calcCompleteLinearDelta()}`;
+    }
+}
+class ExpoRegression {
+    private funktionMinus: Polynom;
+    private funktionPlus: Polynom;
+    private value: number;
+    private sum: number;
+    private training_data: Plot;
+    private grad: number;
+    private origDelta: number;
+    private depth: number;
+    constructor(v: number, s: number, data: Plot, depth: number) {
+        this.training_data = data;
+        this.grad = this.training_data.length - 1;
+        this.value = v;
+        this.sum = s;
+        this.depth = depth;
+
+        this.funktionMinus = Polynom.default();
+        this.funktionPlus = Polynom.default();
+        this.genFunktionen();
+
+        this.origDelta = Infinity;
+    }
+    public draw(): void {
+        this.funktionMinus.drawGraph();
+        this.funktionMinus.drawLinearDelta();
+        this.funktionPlus.drawGraph();
+        this.funktionPlus.drawLinearDelta();
+    }
+    public run(): void {
+        this.funktionMinus.improve();
+        this.funktionPlus.improve();
+    }
+    public improve(): void {
+        let minusDelta: number = this.funktionMinus.calcCompleteLinearDelta();
+        let plusDelta: number = this.funktionPlus.calcCompleteLinearDelta();
+
+        if (minusDelta < this.origDelta && minusDelta < plusDelta) {
+            this.value = this.funktionMinus.getExpo();
+            this.sum *= 2;
+            this.origDelta = minusDelta;
+        } else if (plusDelta < this.origDelta) {
+            this.value = this.funktionPlus.getExpo();
+            this.sum *= 2;
+            this.origDelta = plusDelta;
+        } else {
+            this.sum /= 2;
+        }
+        this.genFunktionen();
+    }
+    private genFunktionen(): void {
+        this.funktionMinus = new Polynom(
+            this.grad,
+            this.value - this.sum,
+            { r: 255, g: 0, b: 0 },
+            this.training_data,
+            this.depth,
+        );
+        this.funktionPlus = new Polynom(
+            this.grad,
+            this.value + this.sum,
+            { r: 0, g: 128, b: 0 },
+            this.training_data,
+            this.depth,
+        );
+    }
+    public toString(): string {
+        return `Expo(${this.value}): ${this.origDelta}` +
+            ` Minus(${this.funktionMinus.getExpo()}): ${this.funktionMinus.calcCompleteLinearDelta()}` +
+            ` Plus(${this.funktionPlus.getExpo()}): ${this.funktionPlus.calcCompleteLinearDelta()}`;
     }
 }
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 
 let VALUES: Plot = [];
-let funktionen: Polynom[] = [];
+let regression: ExpoRegression;
 
 function setup(): void {
     const GRAD: number = 6;
@@ -197,35 +267,31 @@ function setup(): void {
         VALUES.push(new Point(x, random(HEIGHT)));
     }
 
-    funktionen = [
-        new Polynom(GRAD, 1, { r: 0, g: 0, b: 0 }, VALUES, 50),
-        new Polynom(GRAD, 2, { r: 0, g: 128, b: 0 }, VALUES, 2000),
-        new Polynom(GRAD, 3, { r: 255, g: 0, b: 0 }, VALUES, 2000),
-        //new Polynom(GRAD, 4, { r: 0, g: 0, b: 255 }, VALUES, 1000)
-    ];
+    regression = new ExpoRegression(1, 1, VALUES, 2000);
 
     createCanvas(windowWidth, windowHeight);
 }
 function draw(): void {
     background(220);
     render();
-    for (let i = 0; i < funktionen.length; i++) {
-        funktionen[i].improve();
+    if (frameCount % 300 == 0) {
+        regression.improve();
     }
+    regression.run();
 }
 function render(): void {
     for (let i: number = 0; i < VALUES.length; i++) {
         VALUES[i].draw();
     }
-    for (let i = 0; i < funktionen.length; i++) {
-        funktionen[i].drawGraph();
-        funktionen[i].drawLinearDelta();
-    }
-    for (let i: number = 0; i < funktionen.length; i++) {
-        noStroke();
-        fill(funktionen[i].color.r, funktionen[i].color.g, funktionen[i].color.b);
-        text(funktionen[i].toString(), 5, 15 + 20 * i);
-    }
+    noStroke();
+    fill(0);
+    text(regression.toString(), 5, 15);
+    regression.draw();
+    /*for (let i: number = 0; i < funktionen.length; i++) {
+      noStroke();
+      fill(funktionen[i].color.r, funktionen[i].color.g, funktionen[i].color.b);
+      text(funktionen[i].toString(), 5, 15 + 20 * i);
+  }*/
 }
 function windowResized(): void {
     resizeCanvas(windowWidth, windowHeight);
