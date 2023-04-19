@@ -195,8 +195,8 @@ class ExpoRegression {
     private funktionPlus: Polynom;
     private value: number;
     private sum: number;
-    private training_data: Plot;
-    private grad: number;
+    private readonly training_data: Plot;
+    private readonly grad: number;
     private origDelta: number;
     private depth: number;
     constructor(v: number, s: number, data: Plot, depth: number) {
