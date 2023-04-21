@@ -10,6 +10,12 @@ class Color {
   public static default(): Color {
     return new Color(255, 0, 0);
   }
+  public fill(): void {
+    fill(this.r, this.g, this.b);
+  }
+  public stroke(): void {
+    stroke(this.r, this.g, this.b);
+  }
 }
 class Point {
   public readonly x: number;
