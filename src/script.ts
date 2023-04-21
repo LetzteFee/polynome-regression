@@ -27,16 +27,16 @@ class Point {
     this.color = Color.default();
   }
   public draw(): void {
-    let x: number = this.x * (width / WIDTH);
-    let y: number = height - this.y * (height / HEIGHT);
+    const x: number = this.x * (width / WIDTH);
+    const y: number = height - this.y * (height / HEIGHT);
 
     noStroke();
     this.color.fill();
     ellipse(x, y, 5);
   }
   public toString(): string {
-    let x: number = Math.round(this.x);
-    let y: number = Math.round(this.y);
+    const x: number = Math.round(this.x);
+    const y: number = Math.round(this.y);
     return `(${x}, ${y})`;
   }
 }
@@ -117,7 +117,7 @@ class Polynom {
     }
   }
   private improveSpecificKO(index: number): void {
-    let origDelta: number = this.calcCompleteDelta();
+    const origDelta: number = this.calcCompleteDelta();
     let plusDelta: number;
     let minusDelta: number;
 
@@ -245,8 +245,8 @@ class ExpoRegression {
     this.funktionPlus.improve();
   }
   public improve(): void {
-    let minusDelta: number = this.funktionMinus.calcCompleteLinearDelta();
-    let plusDelta: number = this.funktionPlus.calcCompleteLinearDelta();
+    const minusDelta: number = this.funktionMinus.calcCompleteLinearDelta();
+    const plusDelta: number = this.funktionPlus.calcCompleteLinearDelta();
 
     if (minusDelta < this.origDelta && minusDelta < plusDelta) {
       this.value = this.funktionMinus.getExpo();
@@ -300,10 +300,10 @@ let regression: ExpoRegression;
 function setup(): void {
   const GRAD: number = 6;
   const VALUES_LENGTH: number = GRAD + 1;
+  const shift: number = (WIDTH / VALUES_LENGTH) * 0.5;
   for (let i: number = 0; i < VALUES_LENGTH; i++) {
-    let x: number = (WIDTH / VALUES_LENGTH) * i;
-    x += (WIDTH / VALUES_LENGTH) * 0.5;
-    VALUES.push(new Point(x, random(HEIGHT)));
+    const x: number = (WIDTH / VALUES_LENGTH) * i;
+    VALUES.push(new Point(x + shift, random(HEIGHT)));
   }
 
   regression = new ExpoRegression(2, 1, VALUES, 2000);
