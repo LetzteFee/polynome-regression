@@ -31,7 +31,7 @@ class Point {
     let y: number = height - this.y * (height / HEIGHT);
 
     noStroke();
-    fill(this.color.r, this.color.g, this.color.b);
+    this.color.fill();
     ellipse(x, y, 5);
   }
   public toString(): string {
@@ -159,7 +159,7 @@ class Polynom {
     return arr_str.join(" + ");
   }
   public drawGraph(): void {
-    stroke(this.color.r, this.color.g, this.color.b);
+    this.color.stroke();
     for (let i = 0; i < width; i++) {
       let x1: number = i * (WIDTH / width);
       let x2: number = (i + 1) * (WIDTH / width);
