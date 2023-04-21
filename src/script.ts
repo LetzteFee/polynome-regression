@@ -17,6 +17,7 @@ class Color {
     stroke(this.r, this.g, this.b);
   }
 }
+
 class Point {
   public readonly x: number;
   public readonly y: number;
@@ -40,7 +41,35 @@ class Point {
     return `(${x}, ${y})`;
   }
 }
-type Plot = Point[];
+
+class Plot {
+  public points: Point[];
+  constructor(points: Point[]) {
+    this.points = points;
+  }
+  public static default(): Plot {
+    return new Plot([]);
+  }
+  public static genRandomPointsFromLength(length: number): Plot {
+    const shift: number = (WIDTH / length) * 0.5;
+    let values: Point[] = [];
+
+    for (let i: number = 0; i < length; i++) {
+      const x: number = (WIDTH / length) * i;
+      values.push(new Point(x + shift, random(HEIGHT)));
+    }
+    return new Plot(values);
+  }
+  public draw(): void {
+    for (let i: number = 0; i < this.points.length; i++) {
+      this.points[i].draw();
+    }
+  }
+  public getLength(): number {
+    return this.points.length;
+  }
+}
+
 class Koeffizient {
   private value: number;
   private sum: number;
@@ -107,7 +136,7 @@ class Polynom {
     this.calculationsPerCall = depth;
   }
   public static default(): Polynom {
-    return new Polynom(5, 4, Color.default(), [], 1);
+    return new Polynom(5, 4, Color.default(), Plot.default(), 1);
   }
   public improve(): void {
     for (let j: number = 0; j < this.calculationsPerCall; j++) {
@@ -169,11 +198,11 @@ class Polynom {
     }
   }
   public drawLinearDelta(): void {
-    for (let i: number = 0; i < this.training_data.length; i++) {
-      let x: number = this.training_data[i].x * (width / WIDTH);
-      let y1: number = height - this.training_data[i].y * (height / HEIGHT);
+    for (let i: number = 0; i < this.training_data.getLength(); i++) {
+      let x: number = this.training_data.points[i].x * (width / WIDTH);
+      let y1: number = height - this.training_data.points[i].y * (height / HEIGHT);
       let y2: number =
-        height - this.f(this.training_data[i].x) * (height / HEIGHT);
+        height - this.f(this.training_data.points[i].x) * (height / HEIGHT);
 
       stroke(0);
       line(x, y1, x, y2);
@@ -181,9 +210,9 @@ class Polynom {
   }
   public calcCompleteDelta(expo: number = this.delta_expo): number {
     let n: number = 0;
-    for (let i: number = 0; i < this.training_data.length; i++) {
+    for (let i: number = 0; i < this.training_data.getLength(); i++) {
       n += Math.abs(
-        this.training_data[i].y - this.f(this.training_data[i].x)
+        this.training_data.points[i].y - this.f(this.training_data.points[i].x)
       ) ** expo;
     }
     return n;
@@ -207,6 +236,7 @@ class Polynom {
     return `Grad: ${this.getGrad()}, Delta-Expo: ${this.getExpo()}, Delta: ${this.calcCompleteDelta()}, LinearDelta: ${this.calcCompleteLinearDelta()}`;
   }
 }
+
 class ExpoRegression {
   private funktionMinus: Polynom;
   private funktionPlus: Polynom;
@@ -216,9 +246,9 @@ class ExpoRegression {
   private readonly grad: number;
   private origDelta: number;
   private depth: number;
-  constructor(v: number, s: number, data: Plot, depth: number) {
+  constructor(v: number, s: number, data: Plot, grad: number, depth: number) {
     this.training_data = data;
-    this.grad = this.training_data.length - 1;
+    this.grad = grad;
     this.value = v;
     this.sum = s;
     this.depth = depth;
@@ -262,7 +292,7 @@ class ExpoRegression {
     this.genFunktionen();
   }
   private increaseSum(): void {
-    this.sum *= 2;
+    //this.sum *= 2;
   }
   private decreaseSum(): void {
     this.sum /= 4;
@@ -291,22 +321,18 @@ class ExpoRegression {
     );
   }
 }
+
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 
-let VALUES: Plot = [];
+let plot: Plot;
 let regression: ExpoRegression;
 
 function setup(): void {
   const GRAD: number = 6;
-  const VALUES_LENGTH: number = GRAD + 1;
-  const shift: number = (WIDTH / VALUES_LENGTH) * 0.5;
-  for (let i: number = 0; i < VALUES_LENGTH; i++) {
-    const x: number = (WIDTH / VALUES_LENGTH) * i;
-    VALUES.push(new Point(x + shift, random(HEIGHT)));
-  }
 
-  regression = new ExpoRegression(2, 1, VALUES, 2000);
+  plot = Plot.genRandomPointsFromLength(GRAD + 1);
+  regression = new ExpoRegression(2, 1, plot, GRAD, 2000);
 
   createCanvas(windowWidth, windowHeight);
 }
@@ -316,18 +342,12 @@ function draw(): void {
   regression.run();
 }
 function render(): void {
-  for (let i: number = 0; i < VALUES.length; i++) {
-    VALUES[i].draw();
-  }
+  regression.draw();
+  plot.draw();
+
   noStroke();
   fill(0);
   text(regression.toString(), 5, 15);
-  regression.draw();
-  /*for (let i: number = 0; i < funktionen.length; i++) {
-      noStroke();
-      fill(funktionen[i].color.r, funktionen[i].color.g, funktionen[i].color.b);
-      text(funktionen[i].toString(), 5, 15 + 20 * i);
-  }*/
 }
 function windowResized(): void {
   resizeCanvas(windowWidth, windowHeight);
