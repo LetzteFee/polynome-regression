@@ -238,35 +238,40 @@ class Polynom {
 }
 
 class ExpoRegression {
-  private funktionMinus: Polynom;
-  private funktionPlus: Polynom;
-  private value: number;
-  private sum: number;
   private readonly training_data: Plot;
   private readonly grad: number;
+  private readonly depthPerFrame: number;
+  private readonly framesPerCycle: number;
+
+  private value: number;
+  private sum: number;
   private origDelta: number;
-  private depth: number;
+
+  private funktionMinus: Polynom;
+  private funktionPlus: Polynom;
   constructor(v: number, s: number, data: Plot, grad: number, depth: number) {
     this.training_data = data;
     this.grad = grad;
+    this.depthPerFrame = depth;
+    this.framesPerCycle = 300;
+
     this.value = v;
     this.sum = s;
-    this.depth = depth;
+    this.origDelta = Infinity;
 
     this.funktionMinus = Polynom.default();
     this.funktionPlus = Polynom.default();
     this.genFunktionen();
-
-    this.origDelta = Infinity;
   }
   public draw(): void {
     this.funktionMinus.drawGraph();
     this.funktionMinus.drawLinearDelta();
     this.funktionPlus.drawGraph();
     this.funktionPlus.drawLinearDelta();
+    this.training_data.draw();
   }
   public run(): void {
-    if (frameCount % 300 == 0) {
+    if (frameCount % this.framesPerCycle == 0) {
       this.improve();
       console.log(`Expo: ${this.value}, Sum: ${this.sum}`);
     }
@@ -274,7 +279,7 @@ class ExpoRegression {
     this.funktionMinus.improve();
     this.funktionPlus.improve();
   }
-  public improve(): void {
+  private improve(): void {
     const minusDelta: number = this.funktionMinus.calcCompleteLinearDelta();
     const plusDelta: number = this.funktionPlus.calcCompleteLinearDelta();
 
@@ -303,14 +308,14 @@ class ExpoRegression {
       this.value - this.sum,
       new Color(255, 0, 0),
       this.training_data,
-      this.depth
+      this.depthPerFrame
     );
     this.funktionPlus = new Polynom(
       this.grad,
       this.value + this.sum,
       new Color(0, 128, 0),
       this.training_data,
-      this.depth
+      this.depthPerFrame
     );
   }
   public toString(): string {
@@ -343,7 +348,6 @@ function draw(): void {
 }
 function render(): void {
   regression.draw();
-  plot.draw();
 
   noStroke();
   fill(0);
