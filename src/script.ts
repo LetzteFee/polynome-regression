@@ -334,25 +334,24 @@ let plot: Plot;
 let regression: ExpoRegression;
 
 function setup(): void {
-  const GRAD: number = 6;
+  const GRAD: number = 5;
 
   plot = Plot.genRandomPointsFromLength(GRAD + 1);
-  regression = new ExpoRegression(2, 1, plot, GRAD, 2000);
+  regression = new ExpoRegression(2, 1, plot, GRAD, 5000);
 
   createCanvas(windowWidth, windowHeight);
 }
 function draw(): void {
   background(220);
-  render();
+  
   regression.run();
-}
-function render(): void {
   regression.draw();
 
   noStroke();
   fill(0);
   text(regression.toString(), 5, 15);
 }
+
 function windowResized(): void {
   resizeCanvas(windowWidth, windowHeight);
 }
