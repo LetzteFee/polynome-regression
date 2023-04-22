@@ -1,4 +1,9 @@
 class Color {
+  set(r: number, g: number, b: number) {
+    this.r = r;
+    this.g = g;
+    this.b = b;
+  }
   public r: number;
   public g: number;
   public b: number;
@@ -136,7 +141,7 @@ class Polynom {
     this.calculationsPerCall = depth;
   }
   public static default(): Polynom {
-    return new Polynom(5, 4, Color.default(), Plot.default(), 1);
+    return new Polynom(5, 2, Color.default(), Plot.default(), 1);
   }
   public improve(): void {
     for (let j: number = 0; j < this.calculationsPerCall; j++) {
@@ -209,6 +214,9 @@ class Polynom {
     }
   }
   public calcCompleteDelta(expo: number = this.delta_expo): number {
+    if(!this.isValid()) {
+      return Infinity;
+    }
     let n: number = 0;
     for (let i: number = 0; i < this.training_data.getLength(); i++) {
       n += Math.abs(
@@ -235,6 +243,9 @@ class Polynom {
   public toString(): string {
     return `Grad: ${this.getGrad()}, Delta-Expo: ${this.getExpo()}, Delta: ${this.calcCompleteDelta()}, LinearDelta: ${this.calcCompleteLinearDelta()}`;
   }
+  public isValid(): boolean {
+    return this.training_data.getLength() > 0
+  }
 }
 
 class ExpoRegression {
@@ -245,10 +256,9 @@ class ExpoRegression {
 
   private value: number;
   private sum: number;
-  private origDelta: number;
 
-  private funktionMinus: Polynom;
-  private funktionPlus: Polynom;
+  private newFunktion: Polynom;
+  private origFunktion: Polynom;
   constructor(v: number, s: number, data: Plot, grad: number, depth: number) {
     this.training_data = data;
     this.grad = grad;
@@ -257,17 +267,16 @@ class ExpoRegression {
 
     this.value = v;
     this.sum = s;
-    this.origDelta = Infinity;
 
-    this.funktionMinus = Polynom.default();
-    this.funktionPlus = Polynom.default();
+    this.newFunktion = Polynom.default();
+    this.origFunktion = Polynom.default();
     this.genFunktionen();
   }
   public draw(): void {
-    this.funktionMinus.drawGraph();
-    this.funktionMinus.drawLinearDelta();
-    this.funktionPlus.drawGraph();
-    this.funktionPlus.drawLinearDelta();
+    this.newFunktion.drawGraph();
+    this.newFunktion.drawLinearDelta();
+    this.origFunktion.drawGraph();
+    this.origFunktion.drawLinearDelta();
     this.training_data.draw();
   }
   public run(): void {
@@ -276,21 +285,17 @@ class ExpoRegression {
       console.log(`Expo: ${this.value}, Sum: ${this.sum}`);
     }
 
-    this.funktionMinus.improve();
-    this.funktionPlus.improve();
+    this.newFunktion.improve();
   }
   private improve(): void {
-    const minusDelta: number = this.funktionMinus.calcCompleteLinearDelta();
-    const plusDelta: number = this.funktionPlus.calcCompleteLinearDelta();
+    const newDelta: number = this.newFunktion.calcCompleteLinearDelta();
+    const origDelta: number = this.origFunktion.calcCompleteLinearDelta();
 
-    if (minusDelta < this.origDelta && minusDelta < plusDelta) {
-      this.value = this.funktionMinus.getExpo();
+    if (newDelta < origDelta) {
+      this.value = this.newFunktion.getExpo();
       this.increaseSum();
-      this.origDelta = minusDelta;
-    } else if (plusDelta < this.origDelta) {
-      this.value = this.funktionPlus.getExpo();
-      this.increaseSum();
-      this.origDelta = plusDelta;
+      this.origFunktion = this.newFunktion;
+      this.origFunktion.color.set(255, 0, 0);
     } else {
       this.decreaseSum();
     }
@@ -300,17 +305,10 @@ class ExpoRegression {
     //this.sum *= 2;
   }
   private decreaseSum(): void {
-    this.sum /= 4;
+    this.sum /= -2;
   }
   private genFunktionen(): void {
-    this.funktionMinus = new Polynom(
-      this.grad,
-      this.value - this.sum,
-      new Color(255, 0, 0),
-      this.training_data,
-      this.depthPerFrame
-    );
-    this.funktionPlus = new Polynom(
+    this.newFunktion = new Polynom(
       this.grad,
       this.value + this.sum,
       new Color(0, 128, 0),
@@ -318,12 +316,14 @@ class ExpoRegression {
       this.depthPerFrame
     );
   }
-  public toString(): string {
-    return (
-      `Expo(${this.value}): ${this.origDelta}` +
-      ` Minus(${this.funktionMinus.getExpo()}): ${this.funktionMinus.calcCompleteLinearDelta()}` +
-      ` Plus(${this.funktionPlus.getExpo()}): ${this.funktionPlus.calcCompleteLinearDelta()}`
-    );
+  public gui(): void {
+    noStroke();
+
+    this.origFunktion.color.fill();
+    text(`Orig: Expo: ${this.value}, Delta: ${this.origFunktion.calcCompleteLinearDelta()}`, 10, 10);
+
+    this.newFunktion.color.fill();
+    text(`New: Expo: ${this.newFunktion.getExpo()}, Delta: ${this.newFunktion.calcCompleteLinearDelta()}`, 10, 30);
   }
 }
 
@@ -343,13 +343,10 @@ function setup(): void {
 }
 function draw(): void {
   background(220);
-  
+
   regression.run();
   regression.draw();
-
-  noStroke();
-  fill(0);
-  text(regression.toString(), 5, 15);
+  regression.gui();
 }
 
 function windowResized(): void {
