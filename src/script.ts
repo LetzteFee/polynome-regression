@@ -172,10 +172,10 @@ class Polynom {
     } else if (this.arr[index].sumIsHighEnough()) {
       this.arr[index].decreaseSum();
       //this.improveSpecificKO(index);
-    } else {
+    } /*else {
       //this.arr[index].resetSum();
       this.arr[index].increaseSum();
-    }
+    }*/
   }
   public f(x: number): number {
     let sum = 0;
@@ -280,7 +280,6 @@ class ExpoRegression {
   public run(): void {
     if (frameCount % this.framesPerCycle == 0) {
       this.improve();
-      //console.log(`Expo: ${this.origFunktion.getExpo()}, Sum: ${this.sum}`);
     }
 
     this.newFunktion.improve();
@@ -317,7 +316,7 @@ class ExpoRegression {
     noStroke();
 
     this.origFunktion.color.fill();
-    text(`Orig: Expo: ${this.origFunktion.getExpo()}, Delta: ${this.origFunktion.calcCompleteLinearDelta()}`, 10, 10);
+    text(`Orig: Expo: ${this.origFunktion.getExpo()}, Delta: ${this.origFunktion.calcCompleteLinearDelta()}`, 10, 15);
 
     this.newFunktion.color.fill();
     text(`New: Expo: ${this.newFunktion.getExpo()}, Delta: ${this.newFunktion.calcCompleteLinearDelta()}`, 10, 30);
@@ -327,14 +326,12 @@ class ExpoRegression {
 const WIDTH: number = 10;
 const HEIGHT: number = 100;
 
-let plot: Plot;
 let regression: ExpoRegression;
 
 function setup(): void {
-  const GRAD: number = 5;
-
-  plot = Plot.genRandomPointsFromLength(GRAD + 1);
-  regression = new ExpoRegression(2, 1, plot, GRAD, 5000);
+  const GRAD: number = 6;
+  let plot: Plot = Plot.genRandomPointsFromLength(GRAD + 1);
+  regression = new ExpoRegression(2, 1, plot, GRAD, 6000);
 
   createCanvas(windowWidth, windowHeight);
 }
