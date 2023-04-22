@@ -254,7 +254,6 @@ class ExpoRegression {
   private readonly depthPerFrame: number;
   private readonly framesPerCycle: number;
 
-  private value: number;
   private sum: number;
 
   private newFunktion: Polynom;
@@ -265,10 +264,9 @@ class ExpoRegression {
     this.depthPerFrame = depth;
     this.framesPerCycle = 300;
 
-    this.value = v;
     this.sum = s;
 
-    this.newFunktion = Polynom.default();
+    this.newFunktion = new Polynom(this.grad, v, Color.default(), Plot.default(), 0);
     this.origFunktion = Polynom.default();
     this.genFunktionen();
   }
@@ -282,7 +280,7 @@ class ExpoRegression {
   public run(): void {
     if (frameCount % this.framesPerCycle == 0) {
       this.improve();
-      console.log(`Expo: ${this.value}, Sum: ${this.sum}`);
+      //console.log(`Expo: ${this.origFunktion.getExpo()}, Sum: ${this.sum}`);
     }
 
     this.newFunktion.improve();
@@ -292,7 +290,6 @@ class ExpoRegression {
     const origDelta: number = this.origFunktion.calcCompleteLinearDelta();
 
     if (newDelta < origDelta) {
-      this.value = this.newFunktion.getExpo();
       this.increaseSum();
       this.origFunktion = this.newFunktion;
       this.origFunktion.color.set(255, 0, 0);
@@ -302,7 +299,7 @@ class ExpoRegression {
     this.genFunktionen();
   }
   private increaseSum(): void {
-    //this.sum *= 2;
+    this.sum *= 1.5;
   }
   private decreaseSum(): void {
     this.sum /= -2;
@@ -310,7 +307,7 @@ class ExpoRegression {
   private genFunktionen(): void {
     this.newFunktion = new Polynom(
       this.grad,
-      this.value + this.sum,
+      this.origFunktion.getExpo() + this.sum,
       new Color(0, 128, 0),
       this.training_data,
       this.depthPerFrame
@@ -320,7 +317,7 @@ class ExpoRegression {
     noStroke();
 
     this.origFunktion.color.fill();
-    text(`Orig: Expo: ${this.value}, Delta: ${this.origFunktion.calcCompleteLinearDelta()}`, 10, 10);
+    text(`Orig: Expo: ${this.origFunktion.getExpo()}, Delta: ${this.origFunktion.calcCompleteLinearDelta()}`, 10, 10);
 
     this.newFunktion.color.fill();
     text(`New: Expo: ${this.newFunktion.getExpo()}, Delta: ${this.newFunktion.calcCompleteLinearDelta()}`, 10, 30);
