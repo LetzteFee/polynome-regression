@@ -3,6 +3,8 @@ declare const windowHeight: number;
 declare const width: number;
 declare const height: number;
 declare var frameCount: number;
+declare var mouseX: number;
+declare var mouseY: number;
 
 declare function createCanvas(n1: number, n2: number): void;
 declare function resizeCanvas(n1: number, n2: number): void;

@@ -73,6 +73,9 @@ class Plot {
     public getLength(): number {
         return this.points.length;
     }
+    public addPoint(p: Point): void {
+        this.points.push(p);
+    }
 }
 
 class Koeffizient {
@@ -113,13 +116,13 @@ class Koeffizient {
         this.value -= this.sum;
     }
     public sumIsHighEnough(): boolean {
-        return this.sum * 0.5 > 0;
+        return this.sum * 0.25 > 0;
     }
 }
 
 class Polynom {
     private arr: Koeffizient[];
-    private readonly training_data: Plot;
+    private training_data: Plot;
     private readonly delta_expo: number;
     public readonly color: Color;
     private calculationsPerCall: number;
@@ -172,10 +175,10 @@ class Polynom {
         } else if (this.arr[index].sumIsHighEnough()) {
             this.arr[index].decreaseSum();
             //this.improveSpecificKO(index);
-        } /*else {
-        //this.arr[index].resetSum();
-        this.arr[index].increaseSum();
-      }*/
+        } else {
+        this.arr[index].resetSum();
+        //this.arr[index].increaseSum();
+      }
     }
     public f(x: number): number {
         let sum = 0;
@@ -213,6 +216,9 @@ class Polynom {
             line(x, y1, x, y2);
         }
     }
+    public drawPoints(): void {
+        this.training_data.draw();
+    }
     public calcCompleteDelta(expo: number = this.delta_expo): number {
         if (!this.isValid()) {
             return Infinity;
@@ -245,6 +251,9 @@ class Polynom {
     }
     public isValid(): boolean {
         return this.training_data.getLength() > 0
+    }
+    public addPoint(p: Point): void {
+        this.training_data.addPoint(p);
     }
 }
 
