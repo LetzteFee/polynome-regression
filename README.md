@@ -1,9 +1,11 @@
-![alt text](canvas.png)
-Used Library:
-https://github.com/processing/p5.js
+![alt text](canvas.png) Used Library: https://github.com/processing/p5.js
 
 # Installation
-Download the [p5.js library](https://p5js.org/download/) into the `src` folder. Then run the `tsc` command in your terminal and finally open `src/index.html` with a web browser like firefox.
+
+Download the [p5.js library](https://p5js.org/download/) into the `src` folder.
+Then run the `tsc` command in your terminal and finally open `src/index.html`
+with a web browser like firefox.
+
 ```bash
 git clone https://github.com/LetzteFee/polynome-regression.git
 cd polynome-regression
