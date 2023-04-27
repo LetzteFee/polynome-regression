@@ -1,9 +1,4 @@
 class Color {
-    set(r: number, g: number, b: number) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-    }
     public r: number;
     public g: number;
     public b: number;
@@ -11,6 +6,16 @@ class Color {
         this.r = r;
         this.g = g;
         this.b = b;
+    }
+    public set(r: number, g: number, b: number) {
+        function adjust(v: number): number {
+            if (v <= 0) return 0;
+            else if (v >= 255) return 255;
+            else return v;
+        }
+        this.r = adjust(r);
+        this.g = adjust(g);
+        this.b = adjust(b);
     }
     public static default(): Color {
         return new Color(255, 0, 0);
@@ -20,6 +25,20 @@ class Color {
     }
     public stroke(): void {
         stroke(this.r, this.g, this.b);
+    }
+    public toHexString(): string {
+        return "#" + [this.r, this.g, this.b].map(
+            function (value: number): string {
+                if (value >= 254.5) return "FF";
+                if (value < 0.5) return "00";
+                return Math.round(value).toString(16).toUpperCase();
+            },
+        ).map(
+            function (value: string): string {
+                if (value.length < 2) return "0" + value;
+                return value;
+            },
+        ).join("");
     }
 }
 
@@ -56,6 +75,7 @@ class Plot {
         return new Plot([]);
     }
     public static genRandomPointsFromLength(length: number): Plot {
+        if (length < 1) return new Plot([]);
         const shift: number = (WIDTH / length) * 0.5;
         let values: Point[] = [];
 
@@ -85,7 +105,7 @@ class Koeffizient {
     private origValue: number;
     constructor(v: number, sum: number) {
         this.value = v;
-        this.sum = sum;
+        this.sum = sum !== 0 ? sum : 1;
         this.resets = 1;
         this.origValue = 0;
     }
@@ -131,7 +151,7 @@ class Polynom {
         expo: number,
         color: Color,
         data: Plot,
-        depth: number
+        depth: number,
     ) {
         this.training_data = data;
         this.arr = [];
@@ -174,11 +194,10 @@ class Polynom {
             this.arr[index].increaseSum();
         } else if (this.arr[index].sumIsHighEnough()) {
             this.arr[index].decreaseSum();
-            //this.improveSpecificKO(index);
         } else {
-        this.arr[index].resetSum();
-        //this.arr[index].increaseSum();
-      }
+            this.arr[index].resetSum();
+            //this.arr[index].increaseSum();
+        }
     }
     public f(x: number): number {
         let sum = 0;
@@ -208,9 +227,10 @@ class Polynom {
     public drawLinearDelta(): void {
         for (let i: number = 0; i < this.training_data.getLength(); i++) {
             let x: number = this.training_data.points[i].x * (width / WIDTH);
-            let y1: number = height - this.training_data.points[i].y * (height / HEIGHT);
-            let y2: number =
-                height - this.f(this.training_data.points[i].x) * (height / HEIGHT);
+            let y1: number = height -
+                this.training_data.points[i].y * (height / HEIGHT);
+            let y2: number = height -
+                this.f(this.training_data.points[i].x) * (height / HEIGHT);
 
             stroke(0);
             line(x, y1, x, y2);
@@ -226,7 +246,7 @@ class Polynom {
         let n: number = 0;
         for (let i: number = 0; i < this.training_data.getLength(); i++) {
             n += Math.abs(
-                this.training_data.points[i].y - this.f(this.training_data.points[i].x)
+                this.training_data.points[i].y - this.f(this.training_data.points[i].x),
             ) ** expo;
         }
         return n;
@@ -243,14 +263,11 @@ class Polynom {
     public getExpo(): number {
         return this.delta_expo;
     }
-    /*public colorToString(): string {
-              return `r: ${this.color.r} g: ${this.color.g} b: ${this.color.b}`;
-    }*/
     public toString(): string {
         return `Grad: ${this.getGrad()}, Delta-Expo: ${this.getExpo()}, Delta: ${this.calcCompleteDelta()}, LinearDelta: ${this.calcCompleteLinearDelta()}`;
     }
     public isValid(): boolean {
-        return this.training_data.getLength() > 0
+        return this.training_data.getLength() > 0;
     }
     public addPoint(p: Point): void {
         this.training_data.addPoint(p);
@@ -275,7 +292,13 @@ class ExpoRegression {
 
         this.sum = s;
 
-        this.origFunktion = new Polynom(this.grad, v, Color.default(), Plot.default(), 0);
+        this.origFunktion = new Polynom(
+            this.grad,
+            v,
+            Color.default(),
+            Plot.default(),
+            0,
+        );
         this.newFunktion = Polynom.default();
         this.genFunktionen();
     }
@@ -318,17 +341,25 @@ class ExpoRegression {
             this.origFunktion.getExpo() + this.sum,
             new Color(0, 128, 0),
             this.training_data,
-            this.depthPerFrame
+            this.depthPerFrame,
         );
     }
     public gui(): void {
         noStroke();
 
         this.origFunktion.color.fill();
-        text(`Orig: Expo: ${this.origFunktion.getExpo()}, Delta: ${this.origFunktion.calcCompleteLinearDelta()}`, 10, 15);
+        text(
+            `Orig: Expo: ${this.origFunktion.getExpo()}, Delta: ${this.origFunktion.calcCompleteLinearDelta()}`,
+            10,
+            15,
+        );
 
         this.newFunktion.color.fill();
-        text(`New: Expo: ${this.newFunktion.getExpo()}, Delta: ${this.newFunktion.calcCompleteLinearDelta()}`, 10, 30);
+        text(
+            `New: Expo: ${this.newFunktion.getExpo()}, Delta: ${this.newFunktion.calcCompleteLinearDelta()}`,
+            10,
+            30,
+        );
     }
 }
 
