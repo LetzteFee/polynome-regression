@@ -100,116 +100,136 @@ class Plot {
 
 class Koeffizient {
     private value: number;
+    private static readonly default_value: number = 0;
     private sum: number;
-    private resets: number;
+    private static readonly default_sum: number = 1;
+    private sum_resets: number;
     private origValue: number;
-    constructor(v: number, sum: number) {
-        this.value = v;
-        this.sum = sum !== 0 ? sum : 1;
-        this.resets = 1;
-        this.origValue = 0;
+    constructor() {
+        this.value = Koeffizient.default_value;
+        this.sum = Koeffizient.default_sum;
+        this.sum_resets = 0;
+        this.origValue = this.value;
     }
-    public resetSum(): void {
-        this.sum = this.resets ** 2;
-        this.resets++;
-    }
-    public increaseSum(): void {
-        this.sum *= 2;
-    }
-    public decreaseSum(): void {
-        if (this.sumIsHighEnough()) {
-            this.sum *= 0.5;
-        }
-    }
-    public getValue(): number {
-        return this.value;
+    public reset(): void {
+        this.value = Koeffizient.default_value;
+        this.sum = Koeffizient.default_sum;
+        this.sum_resets = 0;
+        this.origValue = this.value;
     }
     public resetValue(): void {
         this.value = this.origValue;
     }
+    public resetSum(): void {
+        this.sum = 2 ** this.sum_resets;
+        this.sum_resets++;
+    }
+    private increaseSum(): void {
+        this.sum *= 2;
+    }
+    public tryDecreaseSum(): boolean {
+        if (this.sum / 4 + 1 != 1 && this.sum / 4 > 0) {
+            this.sum /= 2;
+            return true;
+        }
+        this.resetSum();
+        return false;
+    }
     public increaseValue(): void {
-        this.origValue = this.value;
         this.value += this.sum;
+        this.origValue = this.value;
+        this.increaseSum();
     }
     public decreaseValue(): void {
+        this.value -= this.sum;
         this.origValue = this.value;
+        this.increaseSum();
+    }
+    public testIncreasedValue(): void {
+        this.value += this.sum;
+    }
+    public testDecreasedValue(): void {
         this.value -= this.sum;
     }
-    public sumIsHighEnough(): boolean {
-        return this.sum * 0.25 > 0;
+    public getValue(): number {
+        return this.value;
     }
 }
 
 class Polynom {
-    private arr: Koeffizient[];
+    private koeffizienten: Koeffizient[];
     private training_data: Plot;
     private readonly delta_expo: number;
+    private orig_delta: number;
     public readonly color: Color;
     private calculationsPerCall: number;
+    private add_koeffizient_per_new_point: boolean;
     constructor(
         grad: number,
         expo: number,
         color: Color,
         data: Plot,
         depth: number,
+        akpnp: boolean = false
     ) {
         this.training_data = data;
-        this.arr = [];
+        this.koeffizienten = [];
         for (let i: number = 0; i <= grad; i++) {
-            this.arr.push(new Koeffizient(0, 1));
+            this.koeffizienten.push(new Koeffizient());
         }
 
         this.delta_expo = expo;
+        this.orig_delta = this.calcCompleteDelta();
         this.color = color;
         this.calculationsPerCall = depth;
+        this.add_koeffizient_per_new_point = akpnp;
     }
     public static default(): Polynom {
         return new Polynom(5, 2, Color.default(), Plot.default(), 1);
     }
     public improve(): void {
         for (let j: number = 0; j < this.calculationsPerCall; j++) {
-            for (let i: number = 0; i < this.arr.length; i++) {
-                this.improveSpecificKO(i);
+            for (let i: number = 0; i < this.koeffizienten.length; i++) {
+                this.improveKoeffizient(i, 10);
             }
         }
     }
-    private improveSpecificKO(index: number): void {
-        const origDelta: number = this.calcCompleteDelta();
-        let plusDelta: number;
-        let minusDelta: number;
+    private improveKoeffizient(index: number, depth: number = 0): void {
+        if (depth < 1) return;
+        this.koeffizienten[index].testIncreasedValue();
+        let plusDelta: number = this.calcCompleteDelta();
+        this.koeffizienten[index].resetValue();
 
-        this.arr[index].increaseValue();
-        plusDelta = this.calcCompleteDelta();
-        this.arr[index].resetValue();
+        this.koeffizienten[index].testDecreasedValue();
+        let minusDelta: number = this.calcCompleteDelta();
+        this.koeffizienten[index].resetValue();
 
-        this.arr[index].decreaseValue();
-        minusDelta = this.calcCompleteDelta();
-        this.arr[index].resetValue();
-
-        if (plusDelta < origDelta && plusDelta < minusDelta) {
-            this.arr[index].increaseValue();
-            this.arr[index].increaseSum();
-        } else if (minusDelta < origDelta) {
-            this.arr[index].decreaseValue();
-            this.arr[index].increaseSum();
-        } else if (this.arr[index].sumIsHighEnough()) {
-            this.arr[index].decreaseSum();
+        if (plusDelta < this.orig_delta && plusDelta < minusDelta) {
+            this.koeffizienten[index].increaseValue();
+            this.orig_delta = plusDelta;
+        } else if (minusDelta < this.orig_delta) {
+            this.koeffizienten[index].decreaseValue();
+            this.orig_delta = minusDelta;
         } else {
-            this.arr[index].resetSum();
-            //this.arr[index].increaseSum();
+            if (this.koeffizienten[index].tryDecreaseSum()) {
+                return this.improveKoeffizient(depth - 1);
+            } else {
+                return;
+            }
         }
+        this.improveKoeffizient(index, depth);
     }
     public f(x: number): number {
         let sum = 0;
-        for (let i: number = 0; i < this.arr.length; i++) {
-            sum += this.arr[i].getValue() * x ** i;
+        for (let i: number = 0; i < this.koeffizienten.length; i++) {
+            sum += this.koeffizienten[i].getValue() * (x ** i);
         }
         return sum;
     }
     public fToString(): string {
         let arr_str: string[] = [];
-        for (let i: number = 0; i < this.arr.length; i++) {
-            arr_str.push(Math.round(this.arr[i].getValue()) + "x^" + i);
+        for (let i: number = 0; i < this.koeffizienten.length; i++) {
+            arr_str.push(Math.round(this.koeffizienten[i].getValue()) + "x^" + i);
         }
         arr_str.reverse();
         return arr_str.join(" + ");
@@ -246,19 +266,20 @@ class Polynom {
         let n: number = 0;
         for (let i: number = 0; i < this.training_data.getLength(); i++) {
             n += Math.abs(
+                // TODO: cache this
                 this.training_data.points[i].y - this.f(this.training_data.points[i].x),
             ) ** expo;
         }
         return n;
     }
     public calcAverageDelta(expo: number = this.delta_expo): number {
-        return this.calcCompleteDelta(expo) / this.arr.length;
+        return this.calcCompleteDelta(expo) / this.koeffizienten.length;
     }
     public calcCompleteLinearDelta(): number {
         return this.calcCompleteDelta(1);
     }
     public getGrad(): number {
-        return this.arr.length - 1;
+        return this.koeffizienten.length - 1;
     }
     public getExpo(): number {
         return this.delta_expo;
@@ -271,6 +292,22 @@ class Polynom {
     }
     public addPoint(p: Point): void {
         this.training_data.addPoint(p);
+        if (this.add_koeffizient_per_new_point) {
+            this.koeffizienten.push(new Koeffizient());
+        }
+        this.koeffizientenResetSum();
+        this.orig_delta = this.calcCompleteDelta();
+    }
+    private koeffizientenResetSum(): void {
+        for (let i: number = 0; i < this.koeffizienten.length; i++) {
+            this.koeffizienten[i].resetSum();
+        }
+    }
+    // @ts-ignore
+    private koeffizientenReset(): void {
+        for (let i: number = 0; i < this.koeffizienten.length; i++) {
+            this.koeffizienten[i].reset();
+        }
     }
 }
 

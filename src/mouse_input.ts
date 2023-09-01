@@ -1,7 +1,7 @@
 let funktion: Polynom;
 
 var setup = function (): void {
-    funktion = new Polynom(6, 2, Color.default(), Plot.default(), 2000);
+    funktion = new Polynom(-1, 3, Color.default(), Plot.default(), 5000, true);
 
     createCanvas(windowWidth, windowHeight);
 };

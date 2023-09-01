@@ -3,7 +3,7 @@ var regression: ExpoRegression;
 var setup = function (): void {
   const GRAD: number = 6;
   let plot: Plot = Plot.genRandomPointsFromLength(GRAD + 1);
-  regression = new ExpoRegression(2, 1, plot, GRAD, 6000);
+  regression = new ExpoRegression(2, 1, plot, GRAD, 60);
 
   createCanvas(windowWidth, windowHeight);
 };
